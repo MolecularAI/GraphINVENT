@@ -1,0 +1,7 @@
+atom_types;['C', 'N', 'O', 'S', 'Cl']
+formal_charge;[-1, 0, 1]
+chirality;['None', 'R', 'S']
+max_n_nodes;13
+job_type;train
+dataset_dir;/path/to/GraphINVENT/data/gdb13_1K/
+model;GGNN
