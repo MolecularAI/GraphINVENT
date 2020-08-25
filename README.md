@@ -103,15 +103,15 @@ Some things to keep in mind when using GraphINVENT is that the larger the datase
 is, the more disk space will be required to save the processed dataset splits. Furthermore,
 having additional node features (e.g. atom types) and additional nodes (i.e. greater 
 *max_n_nodes*) in graphs will increase the RAM requirement of jobs, as training data 
-is padded to be the size of the largest graph in the dataset. For reference, the largest 
-dataset we have trained on contains 7 atom types (not counting hydrogen), and molecules 
-with up to 27 heavy atoms, and requires about 10 GB RAM. As such, larger datasets 
-with a larger variety of node features are definitely possible to train on, keeping 
+is padded to be the size of the largest graph in the dataset. For reference, the 
+largest dataset we have trained on contains 7 atom types (not counting hydrogen), 
+and molecules with up to 27 heavy atoms; this requires about 10 GB RAM. Larger datasets 
+with a greater variety of node features are thus certainly possible to train on, keeping 
 in mind that if you have very large molecules you might want to cut down the number 
 of node features, and vice versa, as both of these things multiply and lead to an 
-increase in the RAM requirements. We have not yet examined the edge cases, but estimate 
-that datasets with 10--80 heavy atoms and between 1--15 atom types are in the right 
-range.
+increase in RAM during training/generation. We have not yet examined the edge cases, 
+but estimate that datasets with 10–80 heavy atoms and between 1–15 atom types are 
+in the right range.
 
 ### Workflow
 The structure if the code is divided into four general workflows:
