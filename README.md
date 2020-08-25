@@ -14,7 +14,7 @@ well with state-of-the-art generative models.
 * CUDA-enabled GPU.
 
 ## Setting up the environment
-Begin by configuring your environment to have all the proper versions of PyTorch, 
+Begin by configuring your environment to have all the proper versions of PyTorch,
 RDKit, etc installed. To make this more convenient, you can use the *GraphINVENT.yml*
 file in *environments/*, which lists all packages and versions required. The environment
 can be created from the YAML file by typing:
@@ -62,9 +62,9 @@ the *--job-dir* flag on the terminal:
 
 ### Changing the default settings
 
-If a job directory is specified, one can create an *input.csv* file in that directory 
+If a job directory is specified, one can create an *input.csv* file in that directory
 where parameters different from the default are specified. An example *input.csv*
-file is given in *output/*. 
+file is given in *output/*.
 
 Alternatively, one could simply modify the default parameters in *parameters/defaults.py*, but
 this is not recommended. Instead, we have provided a submission script, *submit.py*,
@@ -99,6 +99,20 @@ with one trained on structures that include aromatic bonds; in this case, the be
 thing to do is create a two copies of your dataset, e.g. *my_dataset_arom/* and
 *my_dataset_no_arom/*, and follow the workflow for each copy with the desired parameters.
 
+Some things to keep in mind when using GraphINVENT is that the larger the dataset
+is, the more disk space will be required to save the processed dataset splits. Furthermore,
+having additional node features (e.g. atom types) and additional nodes (i.e. greater 
+*max_n_nodes*) in graphs will increase the RAM requirement of jobs, as training data 
+is padded to be the size of the largest graph in the dataset. For reference, the largest 
+dataset we have trained on contains 7 atom types (not counting hydrogen), and molecules 
+with up to 27 heavy atoms, and requires about 10 GB RAM. As such, larger datasets 
+with a larger variety of node features are definitely possible to train on, keeping 
+in mind that if you have very large molecules you might want to cut down the number 
+of node features, and vice versa, as both of these things multiply and lead to an 
+increase in the RAM requirements. We have not yet examined the edge cases, but estimate 
+that datasets with 10--80 heavy atoms and between 1--15 atom types are in the right 
+range.
+
 ### Workflow
 The structure if the code is divided into four general workflows:
 * preprocessing
@@ -107,7 +121,7 @@ The structure if the code is divided into four general workflows:
 * benchmarking
 
 See the paper for details. To control what type of job is run, simply tune the *job_type*
-parameter before running a job (possible values include "preprocess", "train", or 
+parameter before running a job (possible values include "preprocess", "train", or
 "generate"); see *Changing the default settings* above.
 
 To start building molecules right away, an example dataset (see *Examples* below)
@@ -159,7 +173,7 @@ of GDB-13 and is already preprocessed.
 The parameters and hyperparameters in *parameters/defaults.py* are the defaults that will be
 used for any job unless they are overwritten by an *input.csv* in the job directory.
 The hyperparameters in *parameters/defaults.py* are generally "good" for these models, but of
-course the "ideal" hyperparameters will vary slightly depending on the dataset. 
+course the "ideal" hyperparameters will vary slightly depending on the dataset.
 
 Note that not all parameters defined in *parameters/defaults.py* are model parameters/hyperparameters;
 many are simply practical, such as the path to the datasets being studied.
@@ -186,13 +200,23 @@ called *get_max_n_nodes.py* that can do this for you.
 
 ## Contributions
 
-Contributions are welcome in the form of issues or pull requests. To report a bug, 
+Contributions are welcome in the form of issues or pull requests. To report a bug,
 please submit an issue.
 
 ## References
-If you use GraphINVENT in your research, please reference our publication:
+If you use GraphINVENT in your research, please reference our 
+[publication](https://chemrxiv.org/articles/preprint/Graph_Networks_for_Molecular_Design/12843137/1):
 
-`TODO` Add link when online.
+```
+@article{Mercado2020,
+author = "Rocío Mercado and Tobias Rastemo and Edvard Lindelöf and Günter Klambauer and Ola Engkvist and Hongming Chen and Esben Jannik Bjerrum",
+title = "{Graph Networks for Molecular Design}",
+year = "2020",
+month = "8",
+url = "https://chemrxiv.org/articles/preprint/Graph_Networks_for_Molecular_Design/12843137",
+doi = "10.26434/chemrxiv.12843137.v1"
+}
+```
 
 ### Related work
 #### MPNNs
