@@ -209,12 +209,12 @@ If you use GraphINVENT in your research, please reference our
 
 ```
 @article{Mercado2020,
-author = "Rocío Mercado and Tobias Rastemo and Edvard Lindelöf and Günter Klambauer and Ola Engkvist and Hongming Chen and Esben Jannik Bjerrum",
-title = "{Graph Networks for Molecular Design}",
-year = "2020",
-month = "8",
-url = "https://chemrxiv.org/articles/preprint/Graph_Networks_for_Molecular_Design/12843137",
-doi = "10.26434/chemrxiv.12843137.v1"
+  author = "Rocío Mercado and Tobias Rastemo and Edvard Lindelöf and Günter Klambauer and Ola Engkvist and Hongming Chen and Esben Jannik Bjerrum",
+  title = "{Graph Networks for Molecular Design}",
+  year = "2020",
+  journal = "ChemRxiv preprint doi:10.26434/chemrxiv.12843137.v1"
+  url = "https://chemrxiv.org/articles/preprint/Graph_Networks_for_Molecular_Design/12843137",
+  doi = "10.26434/chemrxiv.12843137.v1"
 }
 ```
 

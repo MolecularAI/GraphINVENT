@@ -10,8 +10,7 @@ import util
 
 
 def initialize_model():
-    """
-    Initializes the model to be trained. Possible models: "MNN", "S2V",
+    """ Initializes the model to be trained. Possible models: "MNN", "S2V",
     "AttS2V", "GGNN", "AttGGNN", or "EMN".
 
     Returns:

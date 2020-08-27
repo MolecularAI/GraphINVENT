@@ -8,18 +8,18 @@ util.suppress_warnings()
 from parameters.constants import constants as C
 from Workflow import Workflow
 
-# define the generator and run it in the specified run mode
+# defines and runs the job
 
 
 
 def main():
-    """ Generates molecular graphs with different goals (training, generation,
-    testing, or benchmarking).
+    """ Defines the type of job (preprocessing, training, generation, or testing), 
+    runs it, and writes the job parameters used.
     """
     # fix date/time
     _ = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    graph_generator = Workflow(constants=C)
+    workflow = Workflow(constants=C)
 
     job_type = C.job_type
     print(f"* Run mode: '{job_type}'", flush=True)
@@ -29,24 +29,23 @@ def main():
         util.write_preprocessing_parameters(params=C)
 
         # preprocess all datasets
-        graph_generator.preprocess_phase()
+        workflow.preprocess_phase()
 
     elif job_type == "train":
         # write training parameters
         util.write_job_parameters(params=C)
 
         # train model and generate graphs
-        graph_generator.training_phase()
+        workflow.training_phase()
 
     elif job_type == "generate":
         # write generation parameters
         util.write_job_parameters(params=C)
 
         # generate molecules only
-        graph_generator.generation_phase()
+        workflow.generation_phase()
 
     elif job_type == "benchmark":
-        # benchmark models using MOSES
         # TODO not integrated with MOSES, at the moment benchmarking is done by
         # generating N structures, copying the generated SMILES to the MOSES
         # dir, and running the benchmarking job according to MOSES instructions
@@ -57,7 +56,7 @@ def main():
         util.write_job_parameters(params=C)
 
         # evaluate best model using the test set data
-        graph_generator.testing_phase()
+        workflow.testing_phase()
 
     else:
         return NotImplementedError("Not a valid `job_type`.")

@@ -129,9 +129,8 @@ def submit():
 
 
 def write_input_csv(params_dict, filename="params.csv"):
-    """
-    Writes job parameters/hyperparameters in `params_dict` (`dict`) to CSV using
-    the specified `filename` (`str`).
+    """ Writes job parameters/hyperparameters in `params_dict` (`dict`) to CSV 
+    using the specified `filename` (`str`).
     """
     # write the parameters to CSV
     dict_path = params_dict["job_dir"] + filename

@@ -134,8 +134,7 @@ def evaluate_generated_graphs(generated_graphs, termination, nlls, start_time,
 
 
 def evaluate_training_set(preprocessing_graphs):
-    """
-    Computes molecular properties for structures in training set.
+    """ Computes molecular properties for structures in training set.
 
     Args:
       training_graphs (list) : Contains `PreprocessingGraph`s.
