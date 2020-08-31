@@ -36,9 +36,10 @@ params = {
     "job_type": job_type,
     "dataset_dir": f"{data_path}{dataset}/",
     "restart": restart,
-    "min_rel_lr": 1e-3,
+    "min_rel_lr": 5e-2,  # use 1e-3 for larger datasets
     "model": "GGNN",
     "weight_decay": 0.0,
+    "epochs": 400,
     # additional paramaters can be defined here, if different from the "defaults"
     # (!!!) for "generate" jobs, don't forget to specify "generation_epoch" and "n_samples"
 }
