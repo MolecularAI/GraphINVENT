@@ -15,7 +15,7 @@ well with state-of-the-art generative models.
 
 ## Setting up the environment
 Begin by configuring your environment to have all the proper versions of PyTorch,
-RDKit, etc installed. To make this more convenient, you can use the *GraphINVENT.yml*
+RDKit, etc installed. To make this more convenient, you can use the *GraphINVENT-env.yml*
 file in *environments/*, which lists all packages and versions required. The environment
 can be created from the YAML file by typing:
 
@@ -190,6 +190,8 @@ set. GraphINVENT does not calculate this as it is slow for very large datasets, 
 it is better if this is calculated beforehand. We have provided a script in *tools/*,
 called *get_max_n_nodes.py* that can do this for you.
 
+## Tutorials
+For detailed guides on how to use GraphINVENT, see *tutorials/*.
 
 ## Contributors
 [@rociomer](https://www.github.com/rociomer)

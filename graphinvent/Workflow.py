@@ -331,14 +331,14 @@ class Workflow:
 
     def generate_graphs(self, n_samples, evaluation=False):
         """ Generates `n_graphs` molecular graphs and evaluates them. Generates
-        the graphs in batches the size of 100,000 or `n_samples` (int),
+        the graphs in batches the size of `self.C.batch_size` or `n_samples` (int),
         whichever is smaller.
         """
         print(f"* Generating {n_samples} molecules.", flush=True)
 
-        generation_batch_size = min(100000, n_samples)
+        generation_batch_size = min(self.C.batch_size, n_samples)
 
-        n_generation_batches = int(n_samples/100000)
+        n_generation_batches = int(n_samples/self.C.batch_size)
 
         # generate graphs in batches
         for idx in range(0, n_generation_batches + 1):

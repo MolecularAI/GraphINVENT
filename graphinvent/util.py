@@ -41,9 +41,12 @@ def get_last_epoch():
     # define the path to the file containing desired information
     convergence_path = C.job_dir + "convergence.csv"
 
-    epoch_key, lr, avg_loss = read_row(
-        path=convergence_path, row=-1, col=(0, 1, 2)
-    )
+    try:
+        epoch_key, lr, avg_loss = read_row(
+            path=convergence_path, row=-1, col=(0, 1, 2)
+        )
+    except ValueError:
+        epoch_key = "Epoch 1"
 
     generation_epoch = C.generation_epoch
     if C.job_type == "generate":
