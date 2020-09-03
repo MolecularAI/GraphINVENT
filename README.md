@@ -8,12 +8,12 @@ GraphINVENT is a platform for graph-based molecular generation using graph neura
 * CUDA-enabled GPU.
 
 ## Tutorials
-For detailed guides on how to use GraphINVENT, see *tutorials/*.
+For detailed guides on how to use GraphINVENT, see the [tutorials](./tutorials/).
 
 ## Usage summary
 
 ### Setting up the environment
-Begin by configuring your environment to have all the proper versions of PyTorch, RDKit, etc installed. To make this more convenient, you can use the *GraphINVENT-env.yml* file in *environments/*, which lists all packages and versions required. The environment can be created from the YAML file by typing:
+Begin by configuring your environment to have all the proper versions of PyTorch, RDKit, etc installed. To make this more convenient, you can use [./environments/GraphINVENT-env.yml](./environments/GraphINVENT-env.yml), which lists all required packages. The environment can be created from the YAML file by typing:
 
 ```
 conda env create -f environments/GraphINVENT-env.yml
@@ -32,7 +32,7 @@ GraphINVENT can be run from within the configured environment using:
 (GraphINVENT-env)$ python main.py
 ```
 
-This will run a job using the default model and settings specified in *parameters/defaults.py*. Output will be written to *output/*.
+This will run a job using the default model and settings specified in [./graphinvent/parameters/defaults.py](graphinvent/parameters/defaults.py). Output will be written to *output/*.
 
 To have a bit more control, one can also specify the output directory using the *--job-dir* flag on the terminal:
 
@@ -42,9 +42,9 @@ To have a bit more control, one can also specify the output directory using the 
 
 ### Changing the default settings
 
-If a job directory is specified, one can use different settings to the defaults by creating an *input.csv* file in that directory with the desired parameters. An example *input.csv* file is given in *output/*.
+If a job directory is specified, one can use different settings to the defaults by creating an *input.csv* file in that directory with the desired parameters. An example input file is available at [./output/input.csv](./output/input.csv).
 
-Alternatively, one can modify the default parameters in *parameters/defaults.py*, but this is not recommended. Instead, we have provided a submission script, *submit.py*, which can be modified with the desired job parameters and be run as follows:
+Alternatively, one can modify the default parameters in *graphinvent/parameters/defaults.py*, but this is not recommended. Instead, we have provided a submission script, [submit.py](./submit.py), which can be modified with the desired job parameters and be run as follows:
 
 ```
 (GraphINVENT-env)$ python submit.py
@@ -102,29 +102,29 @@ For benchmarking jobs, see below.
 
 
 ### Benchmarking models
-Models can be easily benchmarked using MOSES. To do this, we recommend reading the MOSES documentation, available at *https://github.com/molecularsets/moses*. If you want to compare to previously benchmarked models you will have to train models using the MOSES datasets.
+Models can be easily benchmarked using MOSES. To do this, we recommend reading the MOSES documentation, available at https://github.com/molecularsets/moses. If you want to compare to previously benchmarked models you will have to train models using the MOSES datasets.
 
 Once you have a satisfactorily trained model, you can run a generation job to create 30,000 new structures. GraphINVENT will write these molecules to a SMILES file, which will be created in the *generation/* dir within the job directory. The generated structures can then be used as the <generated dataset> in MOSES evaluation jobs.
 
 ## Examples
-An example training set is available in *data/gdb13_1K/*. It is a small (1K) subset of GDB-13 and is already preprocessed.
+An example training set is available in [./data/gdb13_1K/](./data/gdb13_1K/). It is a small (1K) subset of GDB-13 and is already preprocessed.
 
 ## Hyperparameters
 
 ### Default parameters and hyperparameters
-The parameters and hyperparameters in *graphinvent/parameters/defaults.py* are the defaults that will be used for any job unless they are overwritten by an *input.csv* in the job directory. The hyperparameters in *graphinvent/parameters/defaults.py* are generally "good" for these models, but of course the "ideal" hyperparameters will vary slightly depending on the dataset. In particular, parameters related to the learning rate decay are sensitive to the dataset, so a bit of experimentation here is recommended when changing datasets as these parameters can make a difference between an "okay" model and a well-trained model. These parameters are:
+The parameters and hyperparameters in *./graphinvent/parameters/defaults.py* are the defaults that will be used for any job unless they are overwritten by an *input.csv* in the job directory. The hyperparameters in *./graphinvent/parameters/defaults.py* are generally "good" for these models, but of course the "ideal" hyperparameters will vary slightly depending on the dataset. In particular, parameters related to the learning rate decay are sensitive to the dataset, so a bit of experimentation here is recommended when changing datasets as these parameters can make a difference between an "okay" model and a well-trained model. These parameters are:
 
 * *init_lr*
 * *min_rel_lr*
 * *lrdf*
 * *lrdi*
 
-Note that not all parameters defined in *graphinvent/parameters/defaults.py* are model parameters/hyperparameters; many are simply practical, such as the path to the datasets being studied.
+Note that not all parameters defined in *./graphinvent/parameters/defaults.py* are model-related hyperparameters; many are simply practical parameters and settings, such as the path to the datasets being studied.
 
 ### Dataset parameters
 The most important parameters to overwrite are those related to the dataset in question, such as the atom types present in the dataset, the formal charges present in the dataset, etc (unless you happen to be studying subsets of GDB-13, in which case you won't need to change the defaults). These can be determined using popular cheminformatics toolkits (such as RDKit or OEChem).
 
-You will also need to know the atom count for the largest molecule in your training set. GraphINVENT does not calculate this as it is slow for very large datasets, so it is better if this is calculated beforehand. We have provided a script in *tools/*, called *get_max_n_nodes.py* that can do this for you.
+You will also need to know the atom count for the largest molecule in your training set. GraphINVENT does not calculate this as it is slow for very large datasets, so it is better if this is calculated beforehand. We have provided a script, [./tools/get_max_n_nodes.py](./tools/get_max_n_nodes.py) that can do this for you.
 
 ## Contributors
 [@rociomer](https://www.github.com/rociomer)
@@ -168,17 +168,17 @@ Additional details related to the development of GraphINVENT are available in ou
 #### MPNNs
 The MPNN implementations used in this work were pulled from Edvard Lindelöf's repo in October 2018, while he was a masters student in the MAI group. This work is available at:
 
-*https://github.com/edvardlindelof/graph-neural-networks-for-drug-discovery*.
+https://github.com/edvardlindelof/graph-neural-networks-for-drug-discovery.
 
 His master's thesis, describing the EMN implementation, can be found here:
 
-*https://odr.chalmers.se/handle/20.500.12380/256629*.
+https://odr.chalmers.se/handle/20.500.12380/256629.
 
 #### MOSES
-The MOSES repo is available at *https://github.com/molecularsets/moses*.
+The MOSES repo is available at https://github.com/molecularsets/moses.
 
 #### GDB-13
-The example dataset provided is a subset of GDB-13. This was obtained by randomly sampling 1000 structures from the entire GDB-13 dataset. The full dataset is available for download at *http://gdb.unibe.ch/downloads/*.
+The example dataset provided is a subset of GDB-13. This was obtained by randomly sampling 1000 structures from the entire GDB-13 dataset. The full dataset is available for download at http://gdb.unibe.ch/downloads/.
 
 
 ## License
