@@ -1,4 +1,4 @@
-### Using a new dataset in GraphINVENT
+## Using a new dataset in GraphINVENT
 
 [TODO]
 

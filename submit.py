@@ -4,7 +4,7 @@ import os
 import subprocess
 import time
 
-# example batch submission script
+# example submission script
 
 
 
@@ -17,8 +17,8 @@ restart = False
 force_overwrite = False  # overwrite job directories which already exist
 jobname = "example"      # used to create a sub directory
 
-# if running as batch jobs, also specify the parameters below
-use_sbatch = False       # run batch job or not
+# if running using SLURM, specify the parameters below
+use_slurm = False        # use SLURM or not
 run_time = "1-00:00:00"  # hh:mm:ss
 mem_GB = 20
 
@@ -102,7 +102,7 @@ def submit():
         write_input_csv(params_dict=params, filename="input.csv")
 
         # write `submit.sh` and submit
-        if use_sbatch:
+        if use_slurm:
             print("* Writing submission script.", flush=True)
             write_submission_script(job_dir=params["job_dir"],
                                     job_idx=job_idx,

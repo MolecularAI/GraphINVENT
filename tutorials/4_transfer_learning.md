@@ -1,2 +1,2 @@
-### Transfer learning using GraphINVENT
+## Transfer learning using GraphINVENT
 [TODO]
