@@ -80,7 +80,7 @@ See the paper for details. To control what type of job is run, simply tune the *
 To start building molecules right away, an example dataset (see *Examples* below) has been provided, along with a trained model.
 
 During preprocessing jobs, or `job_type="preprocess"`, the following will be written to the specified *dataset_dir*:
-* 3 HDF files (*train.h5*, *valid.h5*, and *test.smi*)
+* 3 HDF files (*train.h5*, *valid.h5*, and *test.h5*)
 * *preprocessing_params.csv*, containing parameters used in preprocessing the dataset
 * *train.csv*, containing training set properties (e.g. histograms of number of nodes per molecule, number of edges per node, etc)
 
