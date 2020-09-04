@@ -31,15 +31,19 @@ data_path = f"./data/"
 params = {
     "atom_types": ["C", "N", "O", "S", "Cl"],
     "formal_charge": [-1, 0, +1],
-    "chirality": ["None", "R", "S"],
     "max_n_nodes": 13,
     "job_type": job_type,
     "dataset_dir": f"{data_path}{dataset}/",
     "restart": restart,
-    "min_rel_lr": 5e-2,  # use 1e-3 for larger datasets
     "model": "GGNN",
-    "weight_decay": 0.0,
+    "sample_every": 10,
+    "init_lr": 1e-4,
+    "min_rel_lr": 5e-2,  # use 1e-3 for larger datasets
+    "lrdf": 0.9999,
+    "lrdi": 100,
     "epochs": 400,
+    "batch_size": 1000,
+    "block_size": 100000,
     # additional paramaters can be defined here, if different from the "defaults"
     # (!!!) for "generate" jobs, don't forget to specify "generation_epoch" and "n_samples"
 }
@@ -84,7 +88,7 @@ def submit():
         # which is good because *might* not want to override data our existing directories!
         os.makedirs(params["tensorboard_dir"], exist_ok=True)
         try:
-            os.makedirs(params["job_dir"], 
+            os.makedirs(params["job_dir"],
                         exist_ok=bool(job_type in ["generate", "test"] or force_overwrite))
             print(
                 f"* Creating model subdirectory {dataset_output_path}/job_{job_idx}/",
@@ -130,7 +134,7 @@ def submit():
 
 
 def write_input_csv(params_dict, filename="params.csv"):
-    """ Writes job parameters/hyperparameters in `params_dict` (`dict`) to CSV 
+    """ Writes job parameters/hyperparameters in `params_dict` (`dict`) to CSV
     using the specified `filename` (`str`).
     """
     # write the parameters to CSV

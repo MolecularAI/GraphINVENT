@@ -1,9 +1,9 @@
 ## Introduction to GraphINVENT
-As shown in our recent [publication]((https://chemrxiv.org/articles/preprint/Graph_Networks_for_Molecular_Design/12843137/1)), GraphINVENT can be used to learn the structure and connectivity of sets of molecular graphs, thus making it a promising tool for the generation of molecules resembling an input dataset. As models in GraphINVENT are probabilistic, they can be used to discover new molecules that are not present in the training set. 
+As shown in our recent [publication]((https://chemrxiv.org/articles/preprint/Graph_Networks_for_Molecular_Design/12843137/1)), GraphINVENT can be used to learn the structure and connectivity of sets of molecular graphs, thus making it a promising tool for the generation of molecules resembling an input dataset. As models in GraphINVENT are probabilistic, they can be used to discover new molecules that are not present in the training set.
 
-There are six GNN-based models implemented in GraphINVENT: the MNN, GGNN, AttGGNN, S2V, AttS2V, and EMN models. The GGNN has shown the best performance when weighed against the computational time required for training, as is as such used as the default model.
+There are six GNN-based models implemented in GraphINVENT: the MNN, GGNN, AttGGNN, S2V, AttS2V, and EMN models. The GGNN has shown the best performance when weighed against the computational time required for training, and is as such used as the default model.
 
-To begin using GraphINVENT, we have prepared the following tutorial to guide a new user through the molecular generation workflow using a small example dataset. The example dataset is a 1K random subset of GBD-13. It has already been preprocessed, so you can use it directly for Training and Generation. If this is too boring and you would like to learn how to train GraphINVENT models using a new molecular dataset, see [2_using_a_new_dataset](./2_using_a_new_dataset.md).
+To begin using GraphINVENT, we have prepared the following tutorial to guide a new user through the molecular generation workflow using a small example dataset. The example dataset is a 1K random subset of GBD-13. It has already been preprocessed, so you can use it directly for Training and Generation, as we will show in this tutorial. If this is too simple and you would like to learn how to train GraphINVENT models using a new molecular dataset, see [2_using_a_new_dataset](./2_using_a_new_dataset.md).
 
 ### Training using the example dataset
 #### Preparing a training job
@@ -20,7 +20,7 @@ A sample submission script [submit.py](../submit.py) has been provided. Begin by
 ```
 submit.py >
 # define what you want to do for the specified job(s)
-dataset = "gdb13_1K"     # this is the dataset name, which corresponds to the directory name containing the data, located in GraphINVENT/data/
+dataset = "gdb13_1K"     # this is the dataset name, which corresponds to the directory containing the data, located in GraphINVENT/data/
 job_type = "train"       # this tells the code that this is a training job
 jobdir_start_idx = 0     # this is an index used for labeling the first job directory where output will be written
 n_jobs = 1               # if you want to run multiple jobs (e.g. for collecting statistics), set this to >1
@@ -149,7 +149,7 @@ Structures will be generated in batches of size *batch_size*. If you encounter m
 * *epochGEN{generation_epoch}_{batch}.nll*, containing their respective NLLs
 * *epochGEN{generation_epoch}_{batch}.valid*, containing their respective validity (0: invalid, 1: valid)
 
-Additionally, the *generation.csv* file will be updated with the various evaluation metrics for the generated structures. 
+Additionally, the *generation.csv* file will be updated with the various evaluation metrics for the generated structures.
 
 If you've followed the tutorial up to here, it means you can successfully create new molecules using a trained GNN-based model.
 

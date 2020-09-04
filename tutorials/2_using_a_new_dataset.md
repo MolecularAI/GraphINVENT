@@ -4,11 +4,11 @@ In this tutorial, you will be guided through the steps of using a new dataset in
 ### Selecting a new dataset
 Before getting carried away with the possibilities of molecular graph generative models, it should be clear that the GraphINVENT models are computationally demanding, especially compared to string-based models. As such, you should keep in mind the capabilities of your system when selecting a new dataset to study, such as how much disk space you have available, how much RAM, and how fast is your GPU.
 
-In our recent [publication](https://chemrxiv.org/articles/preprint/Graph_Networks_for_Molecular_Design/12843137/1), we report the computational requirements for Preprocessing, Training, Generation, and Benchmarking jobs using the various GraphINVENT models. We summarize some of the results here for the largest dataset we trained on, the [MOSES](https://github.com/molecularsets/moses/tree/master/data) dataset:
+In our recent [publication](https://chemrxiv.org/articles/preprint/Graph_Networks_for_Molecular_Design/12843137/1), we report the computational requirements for Preprocessing, Training, Generation, and Benchmarking jobs using the various GraphINVENT models. We summarize some of the results here for the largest dataset we trained on:
 
-| Dataset | Train | Test | Valid | Largest molecule | Atom Types              | Formal Charges |
+| Dataset                                                          | Train | Test | Valid | Largest molecule | Atom Types              | Formal Charges |
 |---|---|---|---|---|---|---|
-| MOSES   | 1.5M  | 176K | 10K   | 27 atoms         | {C, N, O, F, S, Cl, Br} | {0}            |
+| [MOSES](https://github.com/molecularsets/moses/tree/master/data) | 1.5M  | 176K | 10K   | 27 atoms         | {C, N, O, F, S, Cl, Br} | {0}            |
 
 The disk space used by the different splits, before and after preprocessing (using the best parameters from the paper), are as follows:
 
@@ -19,13 +19,13 @@ The disk space used by the different splits, before and after preprocessing (usi
 
 We point this out to emphasize that if you intend to use a large dataset (such as the MOSES dataset), you need to have considerable disk space available. The sizes of these files can be reduced by specifying a larger *group_size* (default: 1000), but increasing the group size will also increase the time required for preprocessing while having a small effect on decreasing the training time.
 
-Training and Generation jobs using the above dataset generally require <10 GB GPU memory. A model can be fully trained on MOSES after c.a. 5 days of training on a single GPU (using a batch size of 1000).
+Training and Generation jobs using the above dataset generally require <10 GB GPU memory. A model can be fully trained on MOSES after around 5 days of training on a single GPU (using a batch size of 1000).
 
 When selecting a dataset to study, thus keep in mind that more structures in your dataset means 1) more disk space will be required to save processed dataset splits and 2) more computational time will be required for training. The number of structures should not have a significant effect on the RAM requirements of a job, as this can be controlled by the batch and block sizes used. However, the number of atom types present in the dataset will have an effect on the memory and disk space requirements of a job, as this is directly correlated to the sizes of the node and edge features tensors, as well as the sizes of the APDs. As such, you might not want to use the entire periodic table in your generative models.
 
-Finaly, as all molecules are padded up to the size of the largest graph in the dataset during Preprocessing jobs, if you have a dataset where most molecules have fewer nodes than *N*, and you have only a few structures where the number of nodes is >> *N*, a good strategy to reduce the computational requirements for this dataset would be to simply remove all molecules with a number of nodes > *N*. The same thing could be said for the atom types and formal charges. We recommend to only keep any "outliers" in a dataset if they are deemed essential.
+Finally, as all molecules are padded up to the size of the largest graph in the dataset during Preprocessing jobs, if you have a dataset where most molecules have fewer nodes than *N*, and you have only a few structures where the number of nodes is >>*N*, a good strategy to reduce the computational requirements for this dataset would be to simply remove all molecules with >*N* nodes. The same thing could be said for the atom types and formal charges. We recommend to only keep any "outliers" in a dataset if they are deemed essential.
 
-To summarize:
+To summarize,
 
 Increases disk space requirement:
 * more molecules in dataset
@@ -52,7 +52,7 @@ Once you have selected a dataset to study, you must prepare it so that it agrees
 * *test.smi*
 * *valid.smi*
 
-These should contain the training set, test set, and validation set, respectively. It is not important for the SMILES to be canonical, and it also does not matter if the file has a header or not. How many structures you put in each split is also up to you (generally the training set is larger than the testing and validation set). 
+These should contain the training set, test set, and validation set, respectively. It is not important for the SMILES to be canonical, and it also does not matter if the file has a header or not. How many structures you put in each split is also up to you (generally the training set is larger than the testing and validation set).
 
 You should then create a new directory in [../data/](../data/) where the name of this directory corresponds to a unique name for your dataset:
 
@@ -71,14 +71,14 @@ Once you have prepared your dataset in the aforementioned format, you can move o
 * *atom_types*
 * *formal_charge*
 
-We have provided a few scripts to help you calculate these properties in [../tools/](../tools/). 
+We have provided a few scripts to help you calculate these properties in [../tools/](../tools/).
 
 Once you know these values, you can move on to preparing a submission script. A sample submission script [../submit.py](../submit.py) has been provided. Begin by modifying the submission script to specify where the dataset can be found and what type of job you want to run. For preprocessing a new dataset, you can use the settings below, substituting in your own values where necessary:
 
 ```
 submit.py >
 # define what you want to do for the specified job(s)
-dataset = "your_dataset_name"  # this is the dataset name, which corresponds to the directory name containing the data, located in GraphINVENT/data/
+dataset = "your_dataset_name"  # this is the dataset name, which corresponds to the directory containing the data, located in GraphINVENT/data/
 job_type = "preprocess"        # this tells the code that this is a preprocessing job
 jobdir_start_idx = 0           # this is an index used for labeling the first job directory where output will be written
 n_jobs = 1                     # if you want to run multiple jobs (not recommended for preprocessing), set this to >1
@@ -207,7 +207,7 @@ submit.py >
 dataset = "your_dataset_name"
 job_type = "generate"          # this tells the code that this is a generation job
 jobdir_start_idx = 0
-n_jobs = 1    
+n_jobs = 1
 restart = False
 force_overwrite = False
 jobname = "train"              # don't change the jobname, or the program won't find the saved model
@@ -248,7 +248,7 @@ Structures will be generated in batches of size *batch_size*. If you encounter m
 * *epochGEN{generation_epoch}_{batch}.nll*, containing their respective NLLs
 * *epochGEN{generation_epoch}_{batch}.valid*, containing their respective validity (0: invalid, 1: valid)
 
-Additionally, the *generation.csv* file will be updated with the various evaluation metrics for the generated structures. 
+Additionally, the *generation.csv* file will be updated with the various evaluation metrics for the generated structures.
 
 If you've followed the tutorial up to here, it means you can successfully create new molecules using a GNN-based model trained on a custom dataset.
 

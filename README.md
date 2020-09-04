@@ -49,7 +49,7 @@ The references in BibTex format are available below:
   title = "{Practical Notes on Building Molecular Graph Generative Models}",
   year = "2020",
   journal = "ChemRxiv preprint doi:10.26434/chemrxiv.12888383.v1"
-  url = "https://chemrxiv.org/articles/preprint/Practical_Notes_on_Building_Molecular_Graph_Generative_Models/12888383",  
+  url = "https://chemrxiv.org/articles/preprint/Practical_Notes_on_Building_Molecular_Graph_Generative_Models/12888383",
   doi = "10.26434/chemrxiv.12888383.v1"
 }
 ```
