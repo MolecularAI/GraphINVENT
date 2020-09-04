@@ -5,6 +5,16 @@
 ## Description
 This directory contains guides on how to use GraphINVENT. If viewing in a browser (recommended), simply click the link to the desired tutorial to view it.
 
+## Workflow
+The structure if the code is divided into four general steps:
+
+* preprocessing
+* training
+* generation
+* benchmarking
+
+Details on each step are provided in the various tutorials.
+
 ## Tutorials
 * [0_setting_up_environment](./0_setting_up_environment.md) : Instructions on how to set up the GraphINVENT virtual environment.
 * [1_introduction](./1_introduction.md) : A quick introduction to GraphINVENT. Uses the example dataset *gdb13_1K* to guide new users through Training and Generation jobs in the code.

@@ -35,7 +35,7 @@ Then, specify whether you want the job to run using [SLURM](https://slurm.schedm
 submit.py >
 # if running using SLURM, specify the parameters below
 use_slurm = False        # this tells the code to NOT use SLURM
-run_time = "1-00:00:00"  # hh:mm:ss (will be ignored here)
+run_time = "1-00:00:00"  # d-hh:mm:ss (will be ignored here)
 mem_GB = 20              # memory in GB (will be ignored here)
 ```
 
@@ -44,7 +44,7 @@ Then, specify the path to the Python binary in the GraphINVENT virtual environme
 ```
 submit.py >
 # set paths here
-python_path = f"../miniconda3/envs/GraphINVENT-env/bin/python"  # this is the path to the Python binary to use
+python_path = f"../miniconda3/envs/GraphINVENT-env/bin/python"  # this is the path to the Python binary to use (change to your own)
 graphinvent_path = f"./graphinvent/"                            # this is the directory containing the source code
 data_path = f"./data/"                                          # this is the directory where all datasets are found
 ```
@@ -86,7 +86,7 @@ Using the prepared *submit.py*, you can run a GraphINVENT training job from the 
 
 Note that for the code to run, you need to have configured and activated the GraphINVENT environment (see [0_setting_up_environment](0_setting_up_environment.md) for help with this).
 
-As the models are training, you should see the progress bar updating on the terminal every epoch. The training status will be saved every epoch to the job directory, *output_{dataset}/{jobname}/job_{jobdir_start_idx}*, which should be *output_gdb13_1K/example/job_0* if you followed the settings above. Additionally, the evaluation scores will be saved every evaluation epoch to the job directory. Among the files written to this directory will be:
+As the models are training, you should see the progress bar updating on the terminal every epoch. The training status will be saved every epoch to the job directory, *output_{dataset}/{jobname}/job_{jobdir_start_idx}/*, which should be *output_gdb13_1K/example/job_0/* if you followed the settings above. Additionally, the evaluation scores will be saved every evaluation epoch to the job directory. Among the files written to this directory will be:
 
 * *generation.csv*, containing various evaluation metrics for the generated set, calculated during evaluation epochs
 * *convergence.csv*, containing the loss and learning rate for every epoch
