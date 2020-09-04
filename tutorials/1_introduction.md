@@ -57,7 +57,6 @@ submit.py >
 params = {
     "atom_types": ["C", "N", "O", "S", "Cl"],
     "formal_charge": [-1, 0, +1],
-    "chirality": ["None", "R", "S"],
     "max_n_nodes": 13,
     "job_type": job_type,
     "dataset_dir": f"{data_path}{dataset}/",
@@ -102,7 +101,7 @@ If for any reason you want to restart a training job from a previous epoch (e.g.
 
 ### Generation using a trained model
 #### Running a generation job
-One you have trained a model, you can use a saved state (e.g. *model_restart_400.pth*) to generate molecules. To do this, *submit.py* needs to be updated to specify a generation job. The first setting that needs to be changed is the *job_type*; all other settings here should be kept fixed so that the program can find the correct job directory:
+Once you have trained a model, you can use a saved state (e.g. *model_restart_400.pth*) to generate molecules. To do this, *submit.py* needs to be updated to specify a generation job. The first setting that needs to be changed is the *job_type*; all other settings here should be kept fixed so that the program can find the correct job directory:
 
 ```
 submit.py >
@@ -116,7 +115,7 @@ force_overwrite = False
 jobname = "example"
 ```
 
-You will then need to update the *generation_epoch* parameter in *submit.py*:
+You will then need to update the *generation_epoch* and *n_samples* parameters in *submit.py*:
 
 ```
 submit.py >
@@ -124,7 +123,6 @@ submit.py >
 params = {
     "atom_types": ["C", "N", "O", "S", "Cl"],
     "formal_charge": [-1, 0, +1],
-    "chirality": ["None", "R", "S"],
     "max_n_nodes": 13,
     "job_type": job_type,
     "dataset_dir": f"{data_path}{dataset}/",
@@ -138,11 +136,12 @@ params = {
     "epochs": 400,
     "batch_size": 1000,
     "block_size": 100000,
-    "generation_epoch": 400,  # <-- the new parameter
+    "generation_epoch": 400,  # <-- which model to use (i.e. which epoch)
+    "n_samples": 30000,       # <-- how many structures to generate
 }
 ```
 
-The *generation_epoch* should correspond to the saved model state that you want to use for generation. In the example above, 400 will be used. All other parameters should be kept the same (if they are related to training, such as *epochs* or *init_lr*, they will be ignored during generation jobs).
+The *generation_epoch* should correspond to the saved model state that you want to use for generation. In the example above, the parameters specify that the model saved at Epoch 100 should be used to generate 30,000 molecules. All other parameters should be kept the same (if they are related to training, such as *epochs* or *init_lr*, they will be ignored during generation jobs).
 
 Structures will be generated in batches of size *batch_size*. If you encounter memory problems during generation jobs, reducing the batch size should once again solve them. Generated structures, along with their corresponding metadata, will be written to the *generation/* directory within the existing job directory. These files are:
 
