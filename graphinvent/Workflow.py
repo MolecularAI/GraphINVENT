@@ -350,7 +350,7 @@ class Workflow:
             # f : final NLLs (torch.Tensor)
             # t : termination status (torch.Tensor)
             g, a, f, t = generate.build_graphs(model=self.model,
-                                               n_graphs_to_generate=n_samples,
+                                               n_graphs_to_generate=generation_batch_size,
                                                batch_size=generation_batch_size)
 
             # analyze properties of new graphs and save results
