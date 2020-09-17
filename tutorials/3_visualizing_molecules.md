@@ -26,7 +26,7 @@ mols_sampled = random.sample(mols_list, n_samples)  # sample 100 random molecule
 mols_per_row = int(math.sqrt(n_samples))            # make a square grid
 
 png_filename=smi_file[:-3] + "png"  # name of PNG file to create
-labels=list(range(n_samples)        # label structures with a number
+labels=list(range(n_samples))       # label structures with a number
 
 # draw the molecules (creates a PIL image)
 img = MolsToGridImage(mols=mols_sampled,
@@ -54,7 +54,7 @@ smi_file = "path/to/file_100_shuffled.smi"
 mols = SmilesMolSupplier(smi_file, sanitize=True, nameColumn=-1)
 
 png_filename=smi_file[:-3] + "png"  # name of PNG file to create
-labels=list(range(n_samples)        # label structures with a number
+labels=list(range(n_samples))       # label structures with a number
 
 # draw the molecules (creates a PIL image)
 img = MolsToGridImage(mols=mols,
