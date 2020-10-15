@@ -6,7 +6,7 @@ Before getting carried away with the possibilities of molecular graph generative
 
 In our recent [publication](https://chemrxiv.org/articles/preprint/Graph_Networks_for_Molecular_Design/12843137/1), we report the computational requirements for Preprocessing, Training, Generation, and Benchmarking jobs using the various GraphINVENT models. We summarize some of the results here for the largest dataset we trained on:
 
-| Dataset                                                          | Train | Test | Valid | Largest molecule | Atom Types              | Formal Charges |
+| Dataset                                                          | Train | Test | Valid | Largest Molecule | Atom Types              | Formal Charges |
 |---|---|---|---|---|---|---|
 | [MOSES](https://github.com/molecularsets/moses/tree/master/data) | 1.5M  | 176K | 10K   | 27 atoms         | {C, N, O, F, S, Cl, Br} | {0}            |
 
