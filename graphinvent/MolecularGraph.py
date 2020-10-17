@@ -610,7 +610,7 @@ class TrainingGraph(MolecularGraph):
         # define graph attributes
         self.node_features = atom_feature_vector.unsqueeze(dim=0)
 
-        self.edge_features = (torch.Tensor)([[[0] * self.n_edge_features]],
+        self.edge_features = torch.Tensor([[[0] * self.n_edge_features]],
                                           device="cuda")
 
         # initialize the padded graph representation arrays
@@ -638,9 +638,9 @@ class TrainingGraph(MolecularGraph):
           node_features (torch.Tensor) :
           edge_features (torch.Tensor) :
         """
-        # convert to (torch.Tensor)s
-        node_features_tensor = (torch.Tensor)(self.node_features)
-        adjacency_tensor = (torch.Tensor)(self.edge_features)
+        # convert to torch.Tensors
+        node_features_tensor = torch.Tensor(self.node_features)
+        adjacency_tensor = torch.Tensor(self.edge_features)
 
         return node_features_tensor, adjacency_tensor
 
