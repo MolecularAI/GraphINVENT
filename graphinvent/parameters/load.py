@@ -1,4 +1,5 @@
 # load general packages and functions
+import csv
 from rdkit.Chem.rdmolfiles import SmilesMolSupplier
 
 # functions for loading SMILES and model type

@@ -74,7 +74,7 @@ def group_subgraphs(init_idx, molecule_set, dataset_dict, is_training_set, ts_pr
                                                    subgraph_idx=new_SG_idx)
 
             # "collect" all APDs corresponding to pre-existing subgraphs,
-            # otherwise file_exists both new subgraph and new APD
+            # otherwise append both new subgraph and new APD
             count = 0
             for idx, existing_subgraph in enumerate(data_subgraphs):
 
@@ -98,7 +98,7 @@ def group_subgraphs(init_idx, molecule_set, dataset_dict, is_training_set, ts_pr
                     existing_APD += APD
                     break
 
-            # if subgraph is not already in `data_subgraphs`, file_exists it
+            # if subgraph is not already in `data_subgraphs`, append it
             if count == len(data_subgraphs) or count == 0:
                 data_subgraphs.append(SG)
                 data_APDs.append(APD)
