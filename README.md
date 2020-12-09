@@ -28,9 +28,9 @@ Contributions are welcome in the form of issues or pull requests. To report a bu
 
 ## References
 ### Relevant publications
-If you use GraphINVENT in your research, please reference our [publication](https://chemrxiv.org/articles/preprint/Graph_Networks_for_Molecular_Design/12843137/1).
+If you use GraphINVENT in your research, please reference our [publication](https://doi.org/10.1088/2632-2153/abcf91).
 
-Additional details related to the development of GraphINVENT are available in our [technical note](https://chemrxiv.org/articles/preprint/Practical_Notes_on_Building_Molecular_Graph_Generative_Models/12888383/1). You might find this note useful if you're interested in either exploring different hyperparameters or developing your own generative models.
+Additional details related to the development of GraphINVENT are available in our [technical note](https://doi.org/10.1002/ail2.18). You might find this note useful if you're interested in either exploring different hyperparameters or developing your own generative models.
 
 The references in BibTex format are available below:
 
@@ -38,19 +38,19 @@ The references in BibTex format are available below:
 @article{mercado2020graph,
   author = "Rocío Mercado and Tobias Rastemo and Edvard Lindelöf and Günter Klambauer and Ola Engkvist and Hongming Chen and Esben Jannik Bjerrum",
   title = "{Graph Networks for Molecular Design}",
-  year = "2020",
-  journal = "ChemRxiv preprint doi:10.26434/chemrxiv.12843137.v1"
-  url = "https://chemrxiv.org/articles/preprint/Graph_Networks_for_Molecular_Design/12843137",
-  doi = "10.26434/chemrxiv.12843137.v1"
+  journal = {Machine Learning: Science and Technology},
+  year = {2020},
+  publisher = {IOP Publishing},
+  doi = "10.1088/2632-2153/abcf91"
 }
 
 @article{mercado2020practical,
   author = "Rocío Mercado and Tobias Rastemo and Edvard Lindelöf and Günter Klambauer and Ola Engkvist and Hongming Chen and Esben Jannik Bjerrum",
   title = "{Practical Notes on Building Molecular Graph Generative Models}",
-  year = "2020",
-  journal = "ChemRxiv preprint doi:10.26434/chemrxiv.12888383.v1"
-  url = "https://chemrxiv.org/articles/preprint/Practical_Notes_on_Building_Molecular_Graph_Generative_Models/12888383",
-  doi = "10.26434/chemrxiv.12888383.v1"
+  journal = {Applied AI Letters},
+  year = {2020},
+  publisher = {Wiley Online Library},
+  doi = "10.1002/ail2.18"
 }
 ```
 
