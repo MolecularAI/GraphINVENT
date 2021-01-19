@@ -154,7 +154,10 @@ def get_edge_feature_distribution(molecular_graphs):
     The edge types correspond to those defined in `BONDTYPE_TO_INT`.
     """
     # initialize histogram
-    edge_feature_hist = torch.zeros(C.n_edge_features, device="cuda")
+    try:
+        edge_feature_hist = torch.zeros(C.n_edge_features, device="cuda")
+    except:
+        edge_feature_hist = torch.zeros(C.n_edge_features, device="cpu")
 
     for molecular_graph in molecular_graphs:
 
@@ -400,7 +403,10 @@ def get_n_edges_distribution(molecular_graphs, n_edges_to_bin=10):
     (default 10). Also returns the average number of edges per node.
     """
     # initialize and populate histogram (last bin is for # num edges > `n_edges_to_bin`)
-    n_edges_histogram = torch.zeros(n_edges_to_bin, device="cuda")
+    try:
+        n_edges_histogram = torch.zeros(n_edges_to_bin, device="cuda")
+    except:
+        n_edges_histogram = torch.zeros(n_edges_to_bin, device="cpu")
 
     for molecular_graph in molecular_graphs:
 
@@ -441,7 +447,10 @@ def get_n_nodes_distribution(molecular_graphs):
     largest number of nodes. Also returns the average number of nodes per graph.
     """
     # initialize and populate histogram
-    n_nodes_histogram = torch.zeros(C.max_n_nodes + 1, device="cuda")
+    try:
+        n_nodes_histogram = torch.zeros(C.max_n_nodes + 1, device="cuda")
+    except:
+        n_nodes_histogram = torch.zeros(C.max_n_nodes + 1, device="cpu")
 
     for molecular_graph in molecular_graphs:
         n_nodes = molecular_graph.n_nodes
