@@ -4,7 +4,7 @@ In this tutorial, you will be guided through the process of generating molecules
 This tutorial assumes that you have looked through tutorials [1_introduction](./1_introduction.md) and [2_using_a_new_dataset](./2_using_a_new_dataset.md).
 
 ### Selecting two (or more) datasets
-In order to do transfer learning, you must first select two datasets which you would like to work with. The first and (probably) larger dataset should be one that you can use to train your model generally, wheras the second should be one containing (a few) examples of molecules exhibiting the properties you desire in your generated molecules (e.g. known actives).
+In order to do transfer learning, you must first select two datasets which you would like to work with. The first and (probably) larger dataset should be one that you can use to train your model generally, whereas the second should be one containing (a few) examples of molecules exhibiting the properties you desire in your generated molecules (e.g. known actives).
 
 When choosing your datasets, first, remember that GraphINVENT models are computationally demanding; I recommend you go back and review the *Selecting a new dataset* guidelines provided in [2_using_a_new_dataset](./2_using_a_new_dataset.md).
 
