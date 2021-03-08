@@ -173,4 +173,4 @@ sed -i "/^ [0-9]\+$/d" path/to/file.smi  # remove empty graphs from file
 See [3_visualizing_molecules](./3_visualizing_molecules.md) for examples on how to draw grids of molecules.
 
 ### Summary
-Now you know how to train models and generate structures using the example dataset. However, the example dataset structures are not drug-like, and are therefore not the most intresting to study for drug discovery applications. To learn how to train GraphINVENT models on custom datasets, see [2_using_a_new_dataset](./2_using_a_new_dataset.md).
+Now you know how to train models and generate structures using the example dataset. However, the example dataset structures are not drug-like, and are therefore not the most interesting to study for drug discovery applications. To learn how to train GraphINVENT models on custom datasets, see [2_using_a_new_dataset](./2_using_a_new_dataset.md).
