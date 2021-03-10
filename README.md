@@ -27,7 +27,7 @@ Additionally, minor typos and bugs were corrected, and the docstrings and error 
 * Errors in how analysis histograms were written to tensorboard; these were also of questionable utility so are now simply removed.
 * Some values (like the "NLL diff") were removed, as they were also not found to be useful.
 
-If you spot any issues (big or small) since the update, please create an issue or a pull request (if you are able to fix it), and we will be happy to fix them.
+If you spot any issues (big or small) since the update, please create an issue or a pull request (if you are able to fix it), and we will be happy to make changes.
 
 ## Prerequisites
 * Anaconda or Miniconda with Python 3.6 or 3.8.
