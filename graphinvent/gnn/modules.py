@@ -52,7 +52,7 @@ class GraphGather(torch.nn.Module):
 
 class Set2Vec(torch.nn.Module):
     """
-     S2V readout function.
+    S2V readout function.
     """
     def __init__(self, node_features : int, hidden_node_features : int, lstm_computations : int,
                  memory_size : int, constants : namedtuple) -> None:

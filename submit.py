@@ -176,7 +176,6 @@ def write_submission_script(job_dir : str, job_idx : int, job_type : str, max_n_
         submit_file.write(f"#SBATCH --cpus-per-task={cpu_per_task}\n")
         if ptn == "gpu":
             submit_file.write(f"#SBATCH --gres=gpu:1\n")
-            submit_file.write("module load CUDA\n")  # TODO is this needed?
         submit_file.write("hostname\n")
         submit_file.write("export QT_QPA_PLATFORM='offscreen'\n")
         submit_file.write(f"{python_bin_path} {graphinvent_path}main.py --job-dir {job_dir}")

@@ -106,12 +106,13 @@ class Analyzer:
         so only done for the first batch of generated molecules.
 
         Args:
-          generated_graphs (list) : Contains `GenerationGraph`s.
-          termination (torch.Tensor) : Molecular termination details; contains 1 at index if graph
-            from `generated_graphs` was "properly" terminated, 0 otherwise.
-          nlls (torch.Tensor) : Contains final NLL of each item in `generated_graphs`.
-          ts_properties (dict) : Contains training set properties.
-          generation_batch_idx (int) : Generation batch index.
+        ----
+            generated_graphs (list) : Contains `GenerationGraph`s.
+            termination (torch.Tensor) : Molecular termination details; contains 1 at index if graph
+              from `generated_graphs` was "properly" terminated, 0 otherwise.
+            nlls (torch.Tensor) : Contains final NLL of each item in `generated_graphs`.
+            ts_properties (dict) : Contains training set properties.
+            generation_batch_idx (int) : Generation batch index.
         """
         epoch_key = util.get_last_epoch()
 
@@ -178,15 +179,16 @@ class Analyzer:
 
         Args:
         ----
-          molecules (list) : `PreprocessingGraph`s or `GenerationGraph`s, depending on job type.
-          epoch_key (str) : For example, "Training set" or "Epoch {n}".
-          termination (torch.Tensor) : If specified, contains molecular termination details for
-            generated graphs; contains 1 at index if graph  was "properly" terminated, 0 otherwise.
+            molecules (list) : `PreprocessingGraph`s or `GenerationGraph`s, depending on job type.
+            epoch_key (str) : For example, "Training set" or "Epoch {n}".
+            termination (torch.Tensor) : If specified, contains molecular termination details for
+              generated graphs; contains 1 at index if graph  was "properly" terminated, 0 otherwise.
 
         Returns:
         -------
-          properties (dict) : Contains properties of generated and training set molecules.
-            Keys are string tuples, e.g. ("Training set, {property}") or ("Epoch {n}, {property}").
+            properties (dict) : Contains properties of generated and training set molecules.
+              Keys are string tuples, e.g. ("Training set", "{property}") or 
+              ("Epoch {n}", "{property}").
         """
         def _get_n_edges_distribution(molecular_graphs : list, n_edges_to_bin : int=10) -> Tuple[torch.Tensor, float]:
             """
@@ -490,18 +492,20 @@ class Analyzer:
         return weighted_average
 
 
-    def get_validation_nll(self, dataset : str):
-        """ Computes validation NLL (e.g. the NLL for taking the "correct" action
+    def get_validation_nll(self, dataset : str) -> Tuple[torch.Tensor, float]:
+        """
+        Computes validation NLL (e.g. the NLL for taking the "correct" action
         for a specific fragment/atom) for graphs in the validation and training sets
         (whichever is specified by the `dataloader`). The subsets are equal in size
         to the number of structures generated per batch (`n_samples` below). Note:
         do not use for generation set structures, as there is no "correct" action!
 
         Returns:
-          nlls (torch.Tensor) : Contains all NLLs per action for generating a set of
-            molecules via the "correct" set of actions.
-          avg_final_nll (torch.Tensor) : Contains average final NLLs for generating
-            a set of molecules via the "correct" set of actions.
+        -------
+            nlls (torch.Tensor) : Contains all NLLs per action for generating a set of
+              molecules via the "correct" set of actions.
+            avg_final_nll (torch.Tensor) : Contains average final NLLs for generating
+              a set of molecules via the "correct" set of actions.
         """
         if dataset == "validation":
             dataloader = self.valid_dataloader
