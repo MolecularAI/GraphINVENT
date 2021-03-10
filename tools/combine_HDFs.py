@@ -4,7 +4,7 @@ import csv
 import h5py
 import torch
 
-# load program-specific functions
+# load GraphINVENT-specific functions
 # (None)
 
 """
@@ -12,7 +12,7 @@ Combines preprocessed HDF files. Useful when preprocessing large datasets, as
 one can split the `train.smi` into multiple files (and directories), preprocess
 them separately, and then combine using this script.
 
-To use script, modify the variables below to automatically create a list of 
+To use script, modify the variables below to automatically create a list of
 paths **assuming** HDFs were created with the following directory structure:
  data/
   |-- {dataset}_1/
@@ -43,10 +43,9 @@ path_list = [f"data/{dataset}_{i}/train.h5" for i in range(1, n_dirs + 1)]
 
 
 
-def load_ts_properties_from_csv(csv_path):
+def load_ts_properties_from_csv(csv_path : str) -> dict:
     """
-    Loads CSV file containing training set properties from `csv_path` and
-    returns contents as `properties_dict` (`dict`).
+    Loads CSV file containing training set properties and returns contents as a dictionary.
     """
     print("* Loading training set properties.", flush=True)
 
@@ -78,7 +77,7 @@ def load_ts_properties_from_csv(csv_path):
 
     return properties_dict
 
-def write_ts_properties_to_csv(ts_properties_dict):
+def write_ts_properties_to_csv(ts_properties_dict : dict) -> None:
     """
     Writes the training set properties in `ts_properties_dict` to a CSV file.
     """
@@ -100,7 +99,7 @@ def write_ts_properties_to_csv(ts_properties_dict):
             else:
                 csv_writer.writerow([key, value])
 
-def get_dims():
+def get_dims() -> dict:
     """
     Gets the dims corresponding to the three datasets in each preprocessed HDF
     file: "nodes", "edges", and "APDs".
@@ -114,7 +113,7 @@ def get_dims():
 
     return dims
 
-def get_total_n_subgraphs(path_list):
+def get_total_n_subgraphs(path_list : list) -> int:
     """
     Gets the total number of subgraphs saved in all the HDF files in the
     `path_list`, where `path_list` is a list of strings containing the path
@@ -133,10 +132,9 @@ def get_total_n_subgraphs(path_list):
 
     return total_n_subgraphs
 
-def main(path_list):
+def main(path_list : list) -> None:
     """
-    Combine many small HDF files (their paths defined in `path_list`) into one 
-    large HDF file.
+    Combine many small HDF files (their paths defined in `path_list`) into one large HDF file.
     """
     total_n_subgraphs = get_total_n_subgraphs(path_list)
 

@@ -21,11 +21,13 @@ parser.add_argument("--smi",
 args = parser.parse_args()
 
 
-def get_max_n_atoms(smi_file):
-    """ Determines the maximum number of atoms per molecule in an input SMILES file.
+def get_max_n_atoms(smi_file : str) -> int:
+    """
+    Determines the maximum number of atoms per molecule in an input SMILES file.
 
     Args:
-      smi_file (str) : Full path/filename to SMILES file.
+    ----
+        smi_file (str) : Full path/filename to SMILES file.
     """
     molecules = load_molecules(path=smi_file)
 

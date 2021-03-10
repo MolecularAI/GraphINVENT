@@ -102,7 +102,7 @@ Then, specify the path to the Python binary in the GraphINVENT virtual environme
 ```
 submit.py >
 # set paths here
-python_path = f"../miniconda3/envs/GraphINVENT-env/bin/python"  # this is the path to the Python binary to use (change to your own)
+python_path = f"{home}/miniconda3/envs/graphinvent/bin/python"  # this is the path to the Python binary to use (change to your own)
 graphinvent_path = f"./graphinvent/"                            # this is the directory containing the source code
 data_path = f"./data/"                                          # this is the directory where all datasets are found
 ```
@@ -126,7 +126,7 @@ params = {
 At this point, you are done editing the *submit.py* file and are ready to submit a preprocesing job. You can submit the job from the terminal using the following command:
 
 ```
-(GraphINVENT-env)$ python submit.py
+(graphinvent)$ python submit.py
 ```
 
 During preprocessing jobs, the following will be written to the specified *dataset_dir*:
@@ -168,9 +168,6 @@ params = {
     "model": "GGNN",                           # <-- which model to use (GGNN is the default, but showing it here to be explicit)
     "sample_every": 2,                         # <-- how often you want to sample/evaluate your model during training (for larger datasets, we recommend sampling more often)
     "init_lr": 1e-4,                           # <-- tune the initial learning rate if needed
-    "min_rel_lr": 5e-2,                        # <-- tune the minimum relative learning rate if needed
-    "lrdf": 0.9999,                            # <-- recommend not to tune the learning rate decay factor
-    "lrdi": 100,                               # <-- tune the learning rate decay interval if needed
     "epochs": 100,                             # <-- how many epochs you want to train for (you can experiment with this)
     "batch_size": 1000,                        # <-- tune the batch size if needed
     "block_size": 100000,                      # <-- tune the block size if needed
@@ -182,18 +179,18 @@ If any parameters are not specified in *submit.py* before running, the model wil
 You can then run a GraphINVENT training job from the terminal using the following command:
 
 ```
-(GraphINVENT-env)$ python submit.py
+(graphinvent)$ python submit.py
 ```
 
 As the models are training, you should see the progress bar updating on the terminal every epoch. The training status will be saved every epoch to the job directory, *output_{your_dataset_name}/{jobname}/job_{jobdir_start_idx}/*, which should be *output_{your_dataset_name}/train/job_0/* if you followed the settings above. Additionally, the evaluation scores will be saved every evaluation epoch to the job directory. Among the files written to this directory will be:
 
-* *generation.csv*, containing various evaluation metrics for the generated set, calculated during evaluation epochs
-* *convergence.csv*, containing the loss and learning rate for every epoch
-* *validation.csv*, containing model scores (e.g. NLLs, UC-JSD), calculated during evaluation epochs
+* *generation.log*, containing various evaluation metrics for the generated set, calculated during evaluation epochs
+* *convergence.log*, containing the loss and learning rate for every epoch
+* *validation.log*, containing model scores (e.g. NLLs, UC-JSD), calculated during evaluation epochs
 * *model_restart_{epoch}.pth*, which are the model states for use in restarting jobs, or running generation/validation jobs with a trained model
 * *generation/*, a directory containing structures generated during evaluation epochs (\*.smi), as well as information on each structure's NLL (\*.nll) and validity (\*.valid)
 
-It is good to check the *generation.csv* to verify that the generated set features indeed converge to those of the training set (first entry). If they do not, then you will have to tune the hyperparameters to get better performance. Furthermore, it is good to check the *convergence.csv* to make sure the loss is smoothly decreasing during training.
+It is good to check the *generation.log* to verify that the generated set features indeed converge to those of the training set (first entry). If they do not, then you will have to tune the hyperparameters to get better performance. Furthermore, it is good to check the *convergence.log* to make sure the loss is smoothly decreasing during training.
 
 #### Restarting a training job
 If for any reason you want to restart a training job from a previous epoch (e.g. you cancelled a training job before it reached convergence), then you can do this by setting *restart = True* in *submit.py* and rerunning. While it is possible to change certain parameters in *submit.py* before rerunning (e.g. *init_lr* or *epochs*), parameters related to the model should not be changed, as the program will load an existing model from the last saved *model_restart_{epoch}.pth* file (hence there will be a mismatch between the previous parameters and those you changed). Similarly, any settings related to the file location or job name should not be changed, as the program uses those settings to search in the right directory for the previously saved model. Finally, parameters related to the dataset (e.g. *atom_types*) should not be changed, not only for a restart job but throughout the entire workflow of a dataset. If you want to use different features in the node and edge feature representations, you will have to create a copy of the dataset in [../data/](../data/), give it a unique name, and preprocess it using the desired settings.
@@ -229,9 +226,6 @@ params = {
     "model": "GGNN",
     "sample_every": 2,                         # how often you want to sample/evaluate your model during training (for larger datasets, we recommend sampling more often)
     "init_lr": 1e-4,                           # tune the initial learning rate if needed
-    "min_rel_lr": 5e-2,                        # tune the minimum relative learning rate if needed
-    "lrdf": 0.9999,                            # recommend not to tune the learning rate decay factor
-    "lrdi": 100,                               # tune the learning rate decay interval if needed
     "epochs": 100,                             # how many epochs you want to train for (you can experiment with this)
     "batch_size": 1000,                        # <-- tune the batch size if needed
     "block_size": 100000,                      # tune the block size if needed
@@ -248,7 +242,7 @@ Structures will be generated in batches of size *batch_size*. If you encounter m
 * *epochGEN{generation_epoch}_{batch}.nll*, containing their respective NLLs
 * *epochGEN{generation_epoch}_{batch}.valid*, containing their respective validity (0: invalid, 1: valid)
 
-Additionally, the *generation.csv* file will be updated with the various evaluation metrics for the generated structures.
+Additionally, the *generation.log* file will be updated with the various evaluation metrics for the generated structures.
 
 If you've followed the tutorial up to here, it means you can successfully create new molecules using a GNN-based model trained on a custom dataset.
 

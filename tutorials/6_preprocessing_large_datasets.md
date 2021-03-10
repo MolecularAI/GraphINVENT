@@ -24,7 +24,7 @@ Then, comment out the lines for preprocessing the validation and test sets in [.
 Finally, set your desired parameters in *submit.py* and run a preprocessing job for each split (within the GraphINVENT conda environment):
 
 ```
-(GraphINVENT-env)$ python submit.py
+(graphinvent)$ python submit.py
 ```
 
 Once all the HDF files are preprocessed, these can be combined using [../tools/combine_HDFs.py](../tools/combine_HDFs.py).

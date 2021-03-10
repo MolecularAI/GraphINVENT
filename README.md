@@ -5,6 +5,29 @@
 ## Description
 GraphINVENT is a platform for graph-based molecular generation using graph neural networks. GraphINVENT uses a tiered deep neural network architecture to probabilistically generate new molecules a single bond at a time. All models implemented in GraphINVENT can quickly learn to build molecules resembling training set molecules without any explicit programming of chemical rules. The models have been benchmarked using the MOSES distribution-based metrics, showing how the best GraphINVENT model compares well with state-of-the-art generative models.
 
+## Updates
+The following versions of GraphINVENT exist in this repository:
+* v1.0 (and all commits up to here) is the label corresponding to the "original" version, and corresponds with the publications below
+* v2.0 is an updated version, created March 10, 2021.
+
+*10-03-2021*:
+The biggest changes in v2.0 from v1.0 are summarized below:
+* Data preprocessing was updated for readibility (now done in `DataProcesser.py`).
+* Graph generation was updated for readibility (now done in `Generator.py`), as well as some bugs related to how implicit Hs and chirality were handled on the GPU (not used before, despite being available for preprocessing/training).
+* Data analysis code was updated for readibility (now done in `Analyzer.py`).
+* The learning rate decay scheme was changed from a custom learning rate scheduler to the OneCycle scheduler (so far, it appears to be working well enough, and with a reduced set of parameters).
+* The code now runs using the latest version of PyTorch (1.8.0); the previous version was running using PyTorch 1.3. The environment has correspondingly been updated (and renamed "GraphINVENT-env" -> "graphinvent").
+* Redundant hyperparameters were removed; additionally, hyperparameters seen not to improve things were removed from `defaults.py`, such as the optimizer weight decay (now just 0.0) and weights initialization (fixed to Xavier uniform now).
+* Some old functions, such as `models.py` and `loss.py` were consolidated into `Workflow.py`.
+* A validation loss calculation was added to keep track of model training.
+
+Additionally, minor typos and bugs were corrected, and the docstrings and error messages updated. Examples of minor bugs/changes:
+* Bug in how fraction properly terminated graphs (and fraction valid of properly terminated) was calculated (wrong function for data type, which led to errors in rare instances).
+* Errors in how analysis histograms were written to tensorboard; these were also of questionable utility so are now simply removed.
+* Some values (like the "NLL diff") were removed, as they were also not found to be useful.
+
+If you spot any issues (big or small) since the update, please create an issue or a pull request (if you are able to fix it), and we will be happy to fix them.
+
 ## Prerequisites
 * Anaconda or Miniconda with Python 3.6 or 3.8.
 * CUDA-enabled GPU.
@@ -24,7 +47,8 @@ An example training set is available in [./data/gdb13_1K/](./data/gdb13_1K/). It
 
 ## Contributions
 
-Contributions are welcome in the form of issues or pull requests. To report a bug, please submit an issue.
+Contributions are welcome in the form of issues or pull requests. To report a bug, please submit an issue. Thank you to everyone who has used the code and provided feedback thus far.
+
 
 ## References
 ### Relevant publications

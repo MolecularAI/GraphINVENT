@@ -1,14 +1,14 @@
 # load general packages and functions
 import csv
+import rdkit
 from rdkit.Chem.rdmolfiles import SmilesMolSupplier
 
 # functions for loading SMILES and model type
 
 
-
-def molecules(path):
-    """ Reads a SMILES file (full path/filename specified by `path`) and
-    returns a `list` of `rdkit.Mol` objects.
+def molecules(path : str) -> rdkit.Chem.rdmolfiles.SmilesMolSupplier:
+    """
+    Reads a SMILES file (full path/filename specified by `path`) and returns `rdkit.Mol` objects.
     """
     # check first line of SMILES file to see if contains header
     with open(path) as smi_file:
@@ -22,8 +22,9 @@ def molecules(path):
     return molecule_set
 
 
-def which_model(input_csv_path):
-    """ Gets the type of model to use by reading it from CSV (in "input.csv").
+def which_model(input_csv_path : str) -> str:
+    """
+    Gets the type of model to use by reading it from CSV (in "input.csv").
     """
     with open(input_csv_path, "r") as csv_file:
 
@@ -32,4 +33,3 @@ def which_model(input_csv_path):
         for key, value in params_reader:
             if key == "model":
                 return value  # string describing model e.g. "GGNN"
-

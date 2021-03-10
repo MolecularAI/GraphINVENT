@@ -1,9 +1,11 @@
+import rdkit
 from rdkit.Chem.rdmolfiles import SmilesMolSupplier
 
 
-def load_molecules(path):
-    """ Reads a SMILES file (full path/filename specified by `path`) and
-    returns a `list` of `rdkit.Mol` objects.
+def load_molecules(path : str) -> rdkit.Chem.rdmolfiles.SmilesMolSupplier:
+    """
+    Reads a SMILES file (full path/filename specified by `path`) and returns the
+    `rdkit.Mol` object "supplier".
     """
     # check first line of SMILES file to see if contains header
     with open(path) as smi_file:

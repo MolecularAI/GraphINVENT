@@ -22,11 +22,13 @@ parser.add_argument("--smi",
 args = parser.parse_args()
 
 
-def get_atom_types(smi_file):
-    """ Determines the atom types present in an input SMILES file.
+def get_atom_types(smi_file : str) -> list:
+    """
+    Determines the atom types present in an input SMILES file.
 
     Args:
-      smi_file (str) : Full path/filename to SMILES file.
+    ----
+        smi_file (str) : Full path/filename to SMILES file.
     """
     molecules = load_molecules(path=smi_file)
 

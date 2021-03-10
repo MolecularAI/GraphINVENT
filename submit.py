@@ -17,13 +17,15 @@ restart = False
 force_overwrite = False  # overwrite job directories which already exist
 jobname = "example"      # used to create a sub directory
 
-# if running using SLURM, specify the parameters below
+# if running using SLURM sbatch, specify the parameters below
 use_slurm = False        # use SLURM or not
 run_time = "1-00:00:00"  # hh:mm:ss
 mem_GB = 20
 
 # set paths here
-python_path = f"/path/to/envs/GraphINVENT-env/bin/python"
+from pathlib import Path
+home = str(Path.home())
+python_path = f"{home}/miniconda3/envs/graphinvent/bin/python"
 graphinvent_path = f"./graphinvent/"
 data_path = f"./data/"
 
@@ -38,9 +40,6 @@ params = {
     "model": "GGNN",
     "sample_every": 10,
     "init_lr": 1e-4,
-    "min_rel_lr": 5e-2,  # use 1e-3 for larger datasets
-    "lrdf": 0.9999,
-    "lrdi": 100,
     "epochs": 400,
     "batch_size": 1000,
     "block_size": 100000,
@@ -58,9 +57,9 @@ else:
     cpus_per_task = 4
 
 
-def submit():
-    """ Creates and submits submission script. Uses global variables defined at
-    top of this file.
+def submit() -> None:
+    """
+    Creates and submits submission script. Uses global variables defined at top of this file.
     """
     check_paths()
 
@@ -133,9 +132,9 @@ def submit():
         time.sleep(2)
 
 
-def write_input_csv(params_dict, filename="params.csv"):
-    """ Writes job parameters/hyperparameters in `params_dict` (`dict`) to CSV
-    using the specified `filename` (`str`).
+def write_input_csv(params_dict : dict, filename : str="params.csv") -> None:
+    """
+    Writes job parameters/hyperparameters in `params_dict` to CSV using the specified `filename`.
     """
     # write the parameters to CSV
     dict_path = params_dict["job_dir"] + filename
@@ -147,19 +146,23 @@ def write_input_csv(params_dict, filename="params.csv"):
             writer.writerow([key, value])
 
 
-def write_submission_script(job_dir, job_idx, job_type, max_n_nodes, runtime,
-                            mem, ptn, cpu_per_task, python_bin_path,):
-    """ Writes a submission script (`submit.sh`).
+def write_submission_script(job_dir : str, job_idx : int, job_type : str, max_n_nodes : int,
+                            runtime : str, mem : int, ptn : str, cpu_per_task : int,
+                            python_bin_path : str) -> None:
+    """
+    Writes a submission script (`submit.sh`).
 
     Args:
-      job_dir (str) : Job running directory.
-      job_idx (int) : Job idx.
-      job_type (str) : Type of job to run.
-      max_n_nodes (int) : Maximum number of nodes in dataset.
-      runtime (str) : Job run-time limit in hh:mm:ss format.
-      mem (int) : Gigabytes to reserve.
-      ptn (str) : Partition to use, either "core" (CPU) or "gpu" (GPU).
-      python_bin_path (str) : Path to Python binary to use.
+    ----
+        job_dir (str) : Job running directory.
+        job_idx (int) : Job idx.
+        job_type (str) : Type of job to run.
+        max_n_nodes (int) : Maximum number of nodes in dataset.
+        runtime (str) : Job run-time limit in hh:mm:ss format.
+        mem (int) : Gigabytes to reserve.
+        ptn (str) : Partition to use, either "core" (CPU) or "gpu" (GPU).
+        cpu_per_task (int) : How many CPUs to use per task.
+        python_bin_path (str) : Path to Python binary to use.
     """
     submit_filename = job_dir + "submit.sh"
     with open(submit_filename, "w") as submit_file:
@@ -180,8 +183,9 @@ def write_submission_script(job_dir, job_idx, job_type, max_n_nodes, runtime,
         submit_file.write(f" > {job_dir}output.o${{SLURM_JOB_ID}}\n")
 
 
-def check_paths():
-    """ Checks that paths to Python binary, data, and GraphINVENT are properly
+def check_paths() -> None:
+    """
+    Checks that paths to Python binary, data, and GraphINVENT are properly
     defined before running a job, and tells the user to define them if not.
     """
     for path in [python_path, graphinvent_path, data_path]:

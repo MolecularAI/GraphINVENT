@@ -1,8 +1,7 @@
 # load general packages and functions
-import csv
 import sys
 
-# load program-specific functions
+# load GraphINVENT-specific functions
 sys.path.insert(1, "./parameters/")  # search "parameters/" directory
 import parameters.args as args
 import parameters.load as load
@@ -14,49 +13,55 @@ import parameters.load as load
 
 
 # default parameters defined below
-""" Defines the default values for job and model parameters. **Alternative to
-using argparser, as there are many variables.
+"""
+Defines the default values for job and model parameters. **Alternative to
+using argparser, as there are many variables.**
 
 General settings for the generative model:
-  atom_types (list) : Contains atom types (str) to encode in node features.
-  formal_charge (list) : Contains formal charges (int) to encode in node features.
-  imp_H (list) : Contains number of implicit hydrogens (int) to encode in node features.
-  chirality (list) : Contains chiral states (str) to encode in node features.
-  group_size (int) : When preprocessing graphs, this is the size of the
-    preprocessing groups (e.g. how many subgraphs preprocessed at once).
-  generation_epoch (int) : Epoch to sample during a 'generation' job.
-  n_samples (int) : Number of molecules to generate during each sampling epoch.
-    Note: if `n_samples` > 100000 molecules, these will be generated in batches
-    of 100000.
-  n_workers (int) : Number of subprocesses to use during data loading.
-  restart (bool) : If specified, will restart training from previous saved state.
-    Can only be used for preprocessing or training jobs.
-  max_n_nodes (int) : Maximum number of allowed nodes in graph. Must be greater
-    than or equal to the number of nodes in largest graph in training set.
-  job_type (str) : Options: 'preprocess', 'train', 'generate', or 'test'.
-  sample_every (int) : Specifies when to sample the model (i.e. epochs between sampling).
-  dataset_dir (str) : Full path to directory containing testing ("test.smi"),
-    training ("train.smi"), and validation ("valid.smi") sets.
-  use_aromatic_bonds (bool) : If specified, aromatic bond types will be used.
-  use_canon (bool) : If specified, uses canonical RDKit ordering in graph representations.
-  use_chirality (bool) : If specified, includes chirality in the atomic representations.
-  use_explicit_H (bool) : If specified, uses explicit Hs in molecular
-    representations (not recommended for most applications).
-  ignore_H (bool) : If specified, ignores H's completely in graph representations
-    (treats them neither as explicit or implicit). When generating graphs, H's are
-    added to graphs after generation is terminated.
-  use_tensorboard (bool) : If specified, enables the use of tensorboard during training.
-  tensorboard_dir (str) : Path to directory in which to write tensorboard things.
+    atom_types (list) : Contains atom types (str) to encode in node features.
+    formal_charge (list) : Contains formal charges (int) to encode in node features.
+    imp_H (list) : Contains number of implicit hydrogens (int) to encode in node features.
+    chirality (list) : Contains chiral states (str) to encode in node features.
+    device (str) : Specifies type of architecture to run on ("cuda" or "cpu").
+    generation_epoch (int) : Epoch to sample during a 'generation' job.
+    n_samples (int) : Number of molecules to generate during each sampling epoch. Note: if
+      `n_samples` > 100000 molecules, these will be generated in batches of 100000.
+    n_workers (int) : Number of subprocesses to use during data loading.
+    restart (bool) : If specified, will restart training from previous saved state.
+      Can only be used for preprocessing or training jobs.
+    max_n_nodes (int) : Maximum number of allowed nodes in graph. Must be greater
+      than or equal to the number of nodes in largest graph in training set.
+    job_type (str) : Options: 'preprocess', 'train', 'generate', or 'test'.
+    sample_every (int) : Specifies when to sample the model (i.e. epochs between sampling).
+    dataset_dir (str) : Full path to directory containing testing ("test.smi"),
+      training ("train.smi"), and validation ("valid.smi") sets.
+    use_aromatic_bonds (bool) : If specified, aromatic bond types will be used.
+    use_canon (bool) : If specified, uses canonical RDKit ordering in graph representations.
+    use_chirality (bool) : If specified, includes chirality in the atomic representations.
+    use_explicit_H (bool) : If specified, uses explicit Hs in molecular
+      representations (not recommended for most applications).
+    ignore_H (bool) : If specified, ignores H's completely in graph representations
+      (treats them neither as explicit or implicit). When generating graphs, H's are
+      added to graphs after generation is terminated.
+    use_tensorboard (bool) : If specified, enables the use of tensorboard during training.
+    tensorboard_dir (str) : Path to directory in which to write tensorboard things.
+    batch_size (int) : Number of graphs in a mini-batch. When preprocessing graphs, this is the size
+      of the preprocessing groups (e.g. how many subgraphs preprocessed at once).
+    epochs (int) : Number of training epochs.
+    init_lr (float) : Initial learning rate.
+    max_rel_lr (float) : Maximum allowed learning rate relative to the initial (used for
+      learning rate ramp-up).
+    model (str) : MPNN model to use ('MNN', 'S2V', 'AttS2V', 'GGNN', 'AttGGNN', or 'EMN').
 """
 # general job parameters
-params_dict = {
+parameters = {
     "atom_types": ["C", "N", "O", "S", "Cl"],
     "formal_charge": [-1, 0, 1],
     "imp_H": [0, 1, 2, 3],
     "chirality": ["None", "R", "S"],
-    "group_size": 1000,
+    "device": "cuda",
     "generation_epoch": 30,
-    "n_samples": 2000,  #5000,
+    "n_samples": 2000,
     "n_workers": 2,
     "restart": False,
     "max_n_nodes": 13,
@@ -69,41 +74,11 @@ params_dict = {
     "use_explicit_H": False,
     "ignore_H": True,
     "tensorboard_dir": "tensorboard/",
-}
-""" MPNN hyperparameters (common ones):
-  batch_size (int) : Number of graphs in a mini-batch.
-  epochs (int) : Number of training epochs.
-  init_lr (float) : Initial learning rate.
-  lr_ramp_up_epochs (float) : Number of epochs during which to ramp up the lr.
-  lrdf (float) : Factor to multiply by when lowering learning rate (should be < 1).
-  lrdi (int) : Number of minibatches between learning rate updates. Should be
-    proportional to size of training set. Good values are between 1/10th--1/100th
-    the number of molecules in the training set.
-  min_rel_lr (float) : Minimum allowed learning rate relative to the initial (used for
-    learning rate decay).
-  max_rel_lr (float) : Maximum allowed learning rate relative to the initial (used for
-    learning rate ramp-up).
-  ramp_up_lr (bool) : If specified, slowly ramps up the learning rate in the beginning of
-    the calculation.
-  weights_initialization (str) : Initialization scheme for weights in feed-forward networks ('none',
-    'uniform', or 'normal').
-  model (str) : MPNN model to use ('MNN', 'S2V', 'AttS2V', 'GGNN', 'AttGGNN', or 'EMN').
-  weight_decay (float) : Optimizer weight decay (L2 penalty).
-"""
-# model common hyperparameters
-model_common_hp_dict = {
     "batch_size": 1000,
     "block_size": 100000,
     "epochs": 100,
     "init_lr": 1e-4,
-    "lr_ramp_up_minibatches": 500,
-    "lrdf": 0.9999,
-    "lrdi": 100,
-    "min_rel_lr": 5e-2,
-    "max_rel_lr": 10,
-    "ramp_up_lr": False,
-    "weights_initialization": "uniform",
-    "weight_decay": 0.0,
+    "max_rel_lr": 1,
 }
 
 # make sure job dir ends in "/"
@@ -117,13 +92,13 @@ try:
     model = load.which_model(input_csv_path=input_csv_path)
 except:
     model = "GGNN"  # default model
-
-model_common_hp_dict["model"] = model
+parameters["model"] = model
 
 
 # model-specific hyperparameters (implementation-specific)
-if model_common_hp_dict["model"] == "MNN":
-    """ MNN hyperparameters:
+if parameters["model"] == "MNN":
+    """
+    MNN hyperparameters:
       mlp1_depth (int) : Num layers in first-tier MLP in `APDReadout`.
       mlp1_dropout_p (float) : Dropout probability in first-tier MLP in `APDReadout`.
       mlp1_hidden_dim (int) : Number of weights (layer width) in first-tier MLP in `APDReadout`.
@@ -133,7 +108,7 @@ if model_common_hp_dict["model"] == "MNN":
       message_passes (int) : Number of message passing steps.
       message_size (int) : Size of message passed ('enn' MLP output size).
     """
-    model_specific_hp_dict = {
+    hyperparameters = {
         "mlp1_depth": 4,
         "mlp1_dropout_p": 0.0,
         "mlp1_hidden_dim": 500,
@@ -144,8 +119,9 @@ if model_common_hp_dict["model"] == "MNN":
         "message_passes": 3,
         "message_size": 100,
     }
-elif model_common_hp_dict["model"] == "S2V":
-    """ S2V hyperparameters:
+elif parameters["model"] == "S2V":
+    """
+    S2V hyperparameters:
       enn_depth (int) : Num layers in 'enn' MLP.
       enn_dropout_p (float) : Dropout probability in 'enn' MLP.
       enn_hidden_dim (int) : Number of weights (layer width) in 'enn' MLP.
@@ -161,7 +137,7 @@ elif model_common_hp_dict["model"] == "S2V":
       s2v_memory_size (int) : Number of input features and hidden state size in
         LSTM cell in S2V readout.
     """
-    model_specific_hp_dict = {
+    hyperparameters = {
         "enn_depth": 4,
         "enn_dropout_p": 0.0,
         "enn_hidden_dim": 250,
@@ -177,8 +153,9 @@ elif model_common_hp_dict["model"] == "S2V":
         "s2v_lstm_computations": 3,
         "s2v_memory_size": 100,
     }
-elif model_common_hp_dict["model"] == "AttS2V":
-    """ AttS2V hyperparameters:
+elif parameters["model"] == "AttS2V":
+    """
+    AttS2V hyperparameters:
       att_depth (int) : Num layers in 'att_enn' MLP.
       att_dropout_p (float) : Dropout probability in 'att_enn' MLP.
       att_hidden_dim (int) : Number of weights (layer width) in 'att_enn' MLP.
@@ -198,7 +175,7 @@ elif model_common_hp_dict["model"] == "AttS2V":
       s2v_memory_size (int) : Number of input features and hidden state size in
         LSTM cell in S2V readout.
     """
-    model_specific_hp_dict = {
+    hyperparameters = {
         "att_depth": 4,
         "att_dropout_p": 0.0,
         "att_hidden_dim": 250,
@@ -217,8 +194,9 @@ elif model_common_hp_dict["model"] == "AttS2V":
         "s2v_lstm_computations": 3,
         "s2v_memory_size": 100,
     }
-elif model_common_hp_dict["model"] == "GGNN":
-    """ GGNN hyperparameters:
+elif parameters["model"] == "GGNN":
+    """
+    GGNN hyperparameters:
       enn_depth (int) : Num layers in 'enn' MLP.
       enn_dropout_p (float) : Dropout probability in 'enn' MLP.
       enn_hidden_dim (int) : Number of weights (layer width) in 'enn' MLP.
@@ -239,7 +217,7 @@ elif model_common_hp_dict["model"] == "GGNN":
       message_size (int) : Size of message passed (output size of all MLPs in message
         aggregation step, input size to `GRU`).
     """
-    model_specific_hp_dict = {
+    hyperparameters = {
         "enn_depth": 4,
         "enn_dropout_p": 0.0,
         "enn_hidden_dim": 250,
@@ -260,8 +238,9 @@ elif model_common_hp_dict["model"] == "GGNN":
         "message_passes": 3,
         "message_size": 100,
     }
-elif model_common_hp_dict["model"] == "AttGGNN":
-    """ AttGGNN hyperparameters:
+elif parameters["model"] == "AttGGNN":
+    """
+    AttGGNN hyperparameters:
       att_depth (int) : Num layers in 'att_nns' MLP (message aggregation step).
       att_dropout_p (float) : Dropout probability in 'att_nns' MLP (message aggregation step).
       att_hidden_dim (int) : Number of weights (layer width) in 'att_nns' MLP (message
@@ -289,7 +268,7 @@ elif model_common_hp_dict["model"] == "AttGGNN":
       msg_hidden_dim (int) : Number of weights (layer width) in 'msg_nns' MLP (message
         aggregation step).
     """
-    model_specific_hp_dict = {
+    hyperparameters = {
         "att_depth": 4,
         "att_dropout_p": 0.0,
         "att_hidden_dim": 250,
@@ -313,8 +292,9 @@ elif model_common_hp_dict["model"] == "AttGGNN":
         "msg_dropout_p": 0.0,
         "msg_hidden_dim": 250,
     }
-elif model_common_hp_dict["model"] == "EMN":
-    """ EMN hyperparameters:
+elif parameters["model"] == "EMN":
+    """
+    EMN hyperparameters:
       att_depth (int) : Num layers in 'att_msg_nn' MLP (edge propagation step).
       att_dropout_p (float) : Dropout probability in 'att_msg_nn' MLP (edge propagation step).
       att_hidden_dim (int) : Number of weights (layer width) in 'att_msg_nn' MLP (edge
@@ -346,7 +326,7 @@ elif model_common_hp_dict["model"] == "EMN":
       msg_hidden_dim (int) : Number of weights (layer width) in 'emb_msg_nn' MLP (edge
         propagation step).
     """
-    model_specific_hp_dict = {
+    hyperparameters = {
         "att_depth": 4,
         "att_dropout_p": 0.0,
         "att_hidden_dim": 250,
@@ -374,10 +354,9 @@ elif model_common_hp_dict["model"] == "EMN":
     }
 
 # make sure dataset dir ends in "/"
-if params_dict["dataset_dir"][-1] != "/":
+if parameters["dataset_dir"][-1] != "/":
     print("* Adding '/' to end of `dataset_dir`.")
-    params_dict["dataset_dir"] += "/"
+    parameters["dataset_dir"] += "/"
 
 # join dictionaries
-params_dict.update(model_common_hp_dict)
-params_dict.update(model_specific_hp_dict)
+parameters.update(hyperparameters)

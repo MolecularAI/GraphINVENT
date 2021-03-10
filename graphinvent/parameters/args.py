@@ -4,7 +4,6 @@ import argparse
 # defines `ArgumentParser` for specifying job directory using command-line
 
 
-
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                  add_help=False)
 parser.add_argument("--job-dir",

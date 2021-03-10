@@ -22,11 +22,13 @@ parser.add_argument("--smi",
 args = parser.parse_args()
 
 
-def get_formal_charges(smi_file):
-    """ Determines the formal charges present in an input SMILES file.
+def get_formal_charges(smi_file : str) -> list:
+    """
+    Determines the formal charges present in an input SMILES file.
 
     Args:
-      smi_file (str) : Full path/filename to SMILES file.
+    ----
+        smi_file (str) : Full path/filename to SMILES file.
     """
     molecules = load_molecules(path=smi_file)
 
