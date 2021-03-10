@@ -11,6 +11,7 @@ The following versions of GraphINVENT exist in this repository:
 * v2.0 is an updated version, created March 10, 2021.
 
 *10-03-2021*:
+
 The biggest changes in v2.0 from v1.0 are summarized below:
 * Data preprocessing was updated for readibility (now done in `DataProcesser.py`).
 * Graph generation was updated for readibility (now done in `Generator.py`), as well as some bugs related to how implicit Hs and chirality were handled on the GPU (not used before, despite being available for preprocessing/training).
