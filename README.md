@@ -33,7 +33,7 @@ If you spot any issues (big or small) since the update, please create an issue o
 * Anaconda or Miniconda with Python 3.6 or 3.8.
 * CUDA-enabled GPU.
 
-## Tutorials
+## Instructions and Tutorials
 For detailed guides on how to use GraphINVENT, see the [tutorials](./tutorials/).
 
 ## Examples
