@@ -143,7 +143,7 @@ class Workflow:
         if self.constants.restart:
             print("-- Loading model from previous saved state.", flush=True)
             self.restart_epoch = util.get_restart_epoch()
-            self.model.load_state_dict(f"{job_dir}model_restart_{self.restart_epoch}.pth")
+            self.model.load_state_dict(torch.load(f"{job_dir}model_restart_{self.restart_epoch}.pth"))
 
             print(f"-- Backing up as {job_dir}model_restart_{self.restart_epoch}_restarted.pth.",
                   flush=True)
@@ -292,7 +292,7 @@ class Workflow:
         print(f"* Loading model from saved state (Epoch {self.restart_epoch}).", flush=True)
         model_path = self.constants.job_dir + f"model_restart_{self.restart_epoch}.pth"
         self.model = self.create_model()
-        self.model.load_state_dict(model_path)
+        self.model.load_state_dict(torch.load(model_path))
 
         self.model.eval()
         with torch.no_grad():
@@ -311,7 +311,7 @@ class Workflow:
         print(f"* Loading model from previous saved state (Epoch {self.restart_epoch}).", flush=True)
         model_path = self.constants.job_dir + f"model_restart_{self.restart_epoch}.pth"
         self.model = self.create_model()
-        self.model.load_state_dict(model_path)
+        self.model.load_state_dict(torch.load(model_path))
 
         self.model.eval()
         with torch.no_grad():
@@ -431,7 +431,7 @@ class Workflow:
         for batch_idx, batch in tqdm(enumerate(self.train_dataloader),
                                      total=len(self.train_dataloader)):
             if self.constants.device == "cuda":
-                batch = [b.cuda(non_blocking=True) for b in batch]
+                batch = [b.to("cuda", non_blocking=True) for b in batch]
 
             nodes, edges, target_output = batch
             output = self.model(nodes, edges)
@@ -458,7 +458,8 @@ class Workflow:
             average training loss (float)
         """
         print(f"* Evaluating epoch {self.current_epoch}.", flush=True)
-        validation_loss_tensor = torch.zeros(len(self.valid_dataloader), device=self.constants.device)
+        validation_loss_tensor = torch.zeros(len(self.valid_dataloader),
+                                             device=self.constants.device)
 
         self.model.eval()  # ensure model is in eval mode for computing the validation loss
         with torch.no_grad():
@@ -466,7 +467,7 @@ class Workflow:
             for batch_idx, batch in tqdm(enumerate(self.valid_dataloader),
                                          total=len(self.valid_dataloader)):
                 if self.constants.device == "cuda":
-                    batch = [b.cuda(non_blocking=True) for b in batch]
+                    batch = [b.to("cuda", non_blocking=True) for b in batch]
 
                 nodes, edges, target_output = batch
                 output = self.model(nodes, edges)

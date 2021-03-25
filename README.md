@@ -7,7 +7,7 @@ GraphINVENT is a platform for graph-based molecular generation using graph neura
 
 ## Updates
 The following versions of GraphINVENT exist in this repository:
-* v1.0 (and all commits up to here) is the label corresponding to the "original" version, and corresponds with the publications below
+* v1.0 (and all commits up to here) is the label corresponding to the "original" version, and corresponds with the publications below.
 * v2.0 is an updated version, created March 10, 2021.
 
 *10-03-2021*:
@@ -33,7 +33,7 @@ If you spot any issues (big or small) since the update, please create an issue o
 * Anaconda or Miniconda with Python 3.6 or 3.8.
 * CUDA-enabled GPU.
 
-## Instructions and Tutorials
+## Instructions and tutorials
 For detailed guides on how to use GraphINVENT, see the [tutorials](./tutorials/).
 
 ## Examples
