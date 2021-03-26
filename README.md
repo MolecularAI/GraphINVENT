@@ -10,6 +10,9 @@ The following versions of GraphINVENT exist in this repository:
 * v1.0 (and all commits up to here) is the label corresponding to the "original" version, and corresponds with the publications below.
 * v2.0 is an updated version, created March 10, 2021.
 
+*26-03-2021*:
+Small update: you should now be able to use pre-trained models created with GraphINVENT v1.0 with v2.0.
+
 *10-03-2021*:
 
 The biggest changes in v2.0 from v1.0 are summarized below:

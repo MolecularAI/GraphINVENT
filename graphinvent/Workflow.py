@@ -143,7 +143,14 @@ class Workflow:
         if self.constants.restart:
             print("-- Loading model from previous saved state.", flush=True)
             self.restart_epoch = util.get_restart_epoch()
-            self.model.load_state_dict(torch.load(f"{job_dir}model_restart_{self.restart_epoch}.pth"))
+
+            try:
+                # for loading models created using GraphINVENT v1.0 (will raise an exception
+                # if model was created with GraphINVENT v2.0)
+                self.model.state_dict = torch.load(f"{job_dir}model_restart_{self.restart_epoch}.pth").state_dict()
+            except AttributeError:
+                # for loading models created using GraphINVENT v2.0
+                self.model.load_state_dict(torch.load(f"{job_dir}model_restart_{self.restart_epoch}.pth"))
 
             print(f"-- Backing up as {job_dir}model_restart_{self.restart_epoch}_restarted.pth.",
                   flush=True)
@@ -292,7 +299,13 @@ class Workflow:
         print(f"* Loading model from saved state (Epoch {self.restart_epoch}).", flush=True)
         model_path = self.constants.job_dir + f"model_restart_{self.restart_epoch}.pth"
         self.model = self.create_model()
-        self.model.load_state_dict(torch.load(model_path))
+        try:
+            # for loading models created using GraphINVENT v1.0 (will raise an exception
+            # if model was created with GraphINVENT v2.0)
+            self.model.state_dict = torch.load(model_path).state_dict()
+        except AttributeError:
+            # for loading models created using GraphINVENT v2.0
+            self.model.load_state_dict(torch.load(model_path))
 
         self.model.eval()
         with torch.no_grad():
@@ -311,7 +324,13 @@ class Workflow:
         print(f"* Loading model from previous saved state (Epoch {self.restart_epoch}).", flush=True)
         model_path = self.constants.job_dir + f"model_restart_{self.restart_epoch}.pth"
         self.model = self.create_model()
-        self.model.load_state_dict(torch.load(model_path))
+        try:
+            # for loading models created using GraphINVENT v1.0 (will raise an exception
+            # if model was created with GraphINVENT v2.0)
+            self.model.state_dict = torch.load(model_path).state_dict()
+        except AttributeError:
+            # for loading models created using GraphINVENT v2.0
+            self.model.load_state_dict(torch.load(model_path))
 
         self.model.eval()
         with torch.no_grad():
