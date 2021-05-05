@@ -295,6 +295,9 @@ class Workflow:
         print("* Setting up generation job.", flush=True)
         self.load_training_set_properties()
         self.restart_epoch = self.constants.generation_epoch
+        self.analyzer = Analyzer(valid_dataloader=None,
+                                 train_dataloader=None,
+                                 start_time=self.start_time)
 
         print(f"* Loading model from saved state (Epoch {self.restart_epoch}).", flush=True)
         model_path = self.constants.job_dir + f"model_restart_{self.restart_epoch}.pth"
