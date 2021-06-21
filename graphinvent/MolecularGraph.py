@@ -352,6 +352,58 @@ class PreprocessingGraph(MolecularGraph):
 
         return nodes_visited
 
+    def depth_first_search(self, node_ranking : list, node_init : int=0) -> list:
+        """
+        Starting from the specified `node_init` in the graph, uses a depth-first search (DFS)
+        algorithm to find the longest branch nodes, returning an ordered list of these nodes.
+        Prioritizes the nodes based on the input `node_ranking`. The function uses the edge
+        feature tensor to find adjacent nodes.
+
+        Args:
+        ----
+            node_ranking (list) : Contains the ranking of all the nodes in the graph (e.g. the
+              canonical RDKit node ranking, or a random ranking).
+            node_init (int) : Index of node to start the DFS from. Default 0.
+
+        Returns:
+        -------
+            nodes_visited (list) : BFS ordering for nodes in the molecular graph.
+        """
+        nodes_visited = [node_init]
+        last_node_visited = node_init
+
+        # loop until all nodes have been visited
+        while len(nodes_visited) < self.n_nodes:
+
+            neighbor_nodes = []
+            for bond_type in range(self.constants.n_edge_features):
+                neighbor_nodes.extend(list(
+                    np.nonzero(self.edge_features[last_node_visited, :, bond_type])[0]
+                ))
+            new_neighbor_nodes = list(
+                set(neighbor_nodes) - (set(neighbor_nodes) & set(nodes_visited))
+            )
+
+            if not new_neighbor_nodes:  # list is empty
+                # backtrack if there are no "new" neighbor nodes i.e. reached end of branch
+                current_node_idx = nodes_visited.index(last_node_visited)
+                last_node_visited = nodes_visited[current_node_idx - 1]
+                continue
+
+            node_importance = [node_ranking[neighbor_node] for
+                               neighbor_node in new_neighbor_nodes]
+
+            # get the most important of the neighboring nodes
+            most_important_neighbor_node = node_importance.index(max(node_importance))
+
+            # append the new, sorted neighboring nodes to list of visited nodes
+            nodes_visited.extend([new_neighbor_nodes[most_important_neighbor_node]])
+
+            # update the most recently visited node
+            last_node_visited = new_neighbor_nodes[most_important_neighbor_node]
+
+        return nodes_visited
+
     def node_remap(self, molecule : rdkit.Chem.Mol) -> None:
         """
         Remaps nodes in `rdkit.Chem.Mol` object (`molecule`) either randomly, or using RDKit's
@@ -367,8 +419,12 @@ class PreprocessingGraph(MolecularGraph):
 
         # using a random node as a starting point, get a new node ranking that
         # does not leave isolated fragments in graph traversal
-        self.node_ordering = self.breadth_first_search(node_ranking=atom_ranking,
-                                                       node_init=atom_ranking[0])
+        if self.constants.decoding_route == "bfs":
+            self.node_ordering = self.breadth_first_search(node_ranking=atom_ranking,
+                                                           node_init=atom_ranking[0])
+        elif self.constants.decoding_route == "dfs":
+            self.node_ordering = self.depth_first_search(node_ranking=atom_ranking,
+                                                         node_init=atom_ranking[0])
 
         # reorder all nodes according to new node ranking
         self.reorder_nodes()

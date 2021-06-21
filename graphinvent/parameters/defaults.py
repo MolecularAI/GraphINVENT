@@ -52,6 +52,7 @@ General settings for the generative model:
     max_rel_lr (float) : Maximum allowed learning rate relative to the initial (used for
       learning rate ramp-up).
     model (str) : MPNN model to use ('MNN', 'S2V', 'AttS2V', 'GGNN', 'AttGGNN', or 'EMN').
+    decoding_route (str) : Breadth-first search ("bfs") or depth-first search ("dfs").
 """
 # general job parameters
 parameters = {
@@ -79,6 +80,7 @@ parameters = {
     "epochs": 100,
     "init_lr": 1e-4,
     "max_rel_lr": 1,
+    "decoding_route": "bfs",
 }
 
 # make sure job dir ends in "/"

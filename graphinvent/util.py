@@ -317,12 +317,12 @@ def read_column(path : str, column : int) -> np.ndarray:
 def read_last_molecule_idx(restart_file_path: str) -> int:
     """
     Reads the index of the last preprocessed molecule from a file called
-    "index.restart" located in the same directory as the data.
+    "index.restart" located in the same directory as the data. Also returns the 
+    dataset size thus far.
     """
     with open(restart_file_path + "index.restart", "r") as txt_file:
-        last_molecule_idx = txt_file.read()
-    return int(last_molecule_idx)
-
+        last_molecule_idx = np.genfromtxt(txt_file, delimiter=",")
+    return int(last_molecule_idx[0]), int(last_molecule_idx[1])
 
 def read_row(path : str, row : int, col : int) -> np.ndarray:
     """
@@ -366,13 +366,14 @@ def turn_off_empty_axes(n_plots_y : int, n_plots_x : int, ax : plt.axes) -> plt.
     return ax
 
 
-def write_last_molecule_idx(last_molecule_idx : int, restart_file_path : str) -> None:
+def write_last_molecule_idx(last_molecule_idx : int, dataset_size : int, restart_file_path : str) -> None:
     """
-    Writes the index of the last preprocessed molecule (`last_molecule_idx`) to a file
-    called "index.restart" to be located in the same directory as the data.
+    Writes the index of the last preprocessed molecule (`last_molecule_idx`) and the current 
+    dataset size (`dataset_size`) to a file called "index.restart" to be located in the same 
+    directory as the data.
     """
     with open(restart_file_path + "index.restart", "w") as txt_file:
-        txt_file.write(str(last_molecule_idx))
+        txt_file.write(str(last_molecule_idx) + ", " + str(dataset_size))
 
 
 def write_job_parameters(params : namedtuple) -> None:

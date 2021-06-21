@@ -66,8 +66,8 @@ class DataProcesser:
                 self.restart_preprocessing_job()
             else:
                 self.start_new_preprocessing_job()
+                self.dataset_size = 0  # keep track of the dataset size (to resize later)
 
-            self.dataset_size = 0  # keep track of the dataset size (to resize later)
             self.ts_properties = None
 
             # this is where we fill the datasets with actual data by looping over
@@ -84,6 +84,7 @@ class DataProcesser:
                     self.get_subgraphs(init_idx=idx)
 
                     util.write_last_molecule_idx(last_molecule_idx=self.resume_idx,
+                                                 dataset_size=self.dataset_size,
                                                  restart_file_path=constants.dataset_dir)
 
 
@@ -93,7 +94,7 @@ class DataProcesser:
                     self.resize_datasets()  # remove padding from initialization
                     print("Datasets resized.", flush=True)
 
-                    if self.is_training_set:
+                    if self.is_training_set and not constants.restart:
 
                         print("Writing training set properties.", flush=True)
                         util.write_ts_properties(training_set_properties=self.ts_properties)
@@ -108,8 +109,10 @@ class DataProcesser:
         Restarts a preprocessing job. Uses an index specified in the dataset
         directory to know where to resume preprocessing.
         """
-
-        self.resume_idx = util.read_last_molecule_idx(restart_file_path=constants.dataset_dir)
+        try:
+            self.resume_idx, self.dataset_size = util.read_last_molecule_idx(restart_file_path=constants.dataset_dir)
+        except:
+            self.resume_idx, self.dataset_size = 0, 0
         self.skip_collection = bool(self.resume_idx == self.n_molecules and self.is_training_set)
 
         # load dictionary of previously created datasets (`self.ds`)
