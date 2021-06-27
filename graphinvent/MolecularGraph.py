@@ -355,9 +355,9 @@ class PreprocessingGraph(MolecularGraph):
     def depth_first_search(self, node_ranking : list, node_init : int=0) -> list:
         """
         Starting from the specified `node_init` in the graph, uses a depth-first search (DFS)
-        algorithm to find the longest branch nodes, returning an ordered list of these nodes.
-        Prioritizes the nodes based on the input `node_ranking`. The function uses the edge
-        feature tensor to find adjacent nodes.
+        algorithm to find the longest branch nodes, returning an ordered list of the nodes
+        traversed. Prioritizes the nodes based on the input `node_ranking`. The function uses 
+        the edge feature tensor to find adjacent nodes.
 
         Args:
         ----
@@ -367,7 +367,7 @@ class PreprocessingGraph(MolecularGraph):
 
         Returns:
         -------
-            nodes_visited (list) : BFS ordering for nodes in the molecular graph.
+            nodes_visited (list) : DFS ordering for nodes in the molecular graph.
         """
         nodes_visited = [node_init]
         last_node_visited = node_init
