@@ -64,18 +64,18 @@ class GraphGenerator:
         print(f"--{n_generated_graphs/self.start_time:4.5} molecules/s")
 
         # convert the molecular graphs (currently separate node and edge features tensors) into
-        # `GenerationGraph` objects; sometimes `n_generated_graphs` > `constants.n_samples`, in
+        # `GenerationGraph` objects; sometimes `n_generated_graphs` > `self.batch_size`, in
         # which case the extra generated graphs are simply discarded below
-        graphs = [self.graph_to_graph(idx) for idx in range(constants.n_samples)]
+        graphs = [self.graph_to_graph(idx) for idx in range(self.batch_size)]
 
         # sum NLL per action to get the total NLL for each structure; remove extra zero padding
-        final_nlls = torch.sum(self.generated_nlls, dim=1)[:constants.n_samples]
+        final_nlls = torch.sum(self.generated_nlls, dim=1)[:self.batch_size]
 
         # remove extra zero padding from NLLs
         generated_nlls = self.generated_nlls[self.generated_nlls != 0]
 
         # remove extra padding from `properly_terminated` tensor
-        properly_terminated = self.properly_terminated[:constants.n_samples]
+        properly_terminated = self.properly_terminated[:self.batch_size]
 
         return graphs, generated_nlls, final_nlls, properly_terminated
 
@@ -86,18 +86,19 @@ class GraphGenerator:
 
         Returns:
         -------
-            n_generated_so_far (int) : Number molecules built (may be > `n_samples` due to buffer).
+            n_generated_so_far (int) : Number molecules built (may be >
+              `self.batch_size` due to buffer).
         """
         softmax = torch.nn.Softmax(dim=1)
 
         # keep track of a few things...
         n_generated_so_far = 0
-        t_bar = tqdm(total=constants.n_samples)
+        t_bar = tqdm(total=self.batch_size)
         generation_round = 0
 
         # generate graphs in a batch, saving graphs when either the terminate action or an
-        # invalid action is sampled, until `n_samples` number of graphs have been generated
-        while n_generated_so_far < constants.n_samples:
+        # invalid action is sampled, until `self.batch_size` number of graphs have been generated
+        while n_generated_so_far < self.batch_size:
 
             # predict the APDs for this batch of graphs
             apd = softmax(self.model(self.nodes, self.edges))
@@ -144,13 +145,12 @@ class GraphGenerator:
         graph generation process.
         """
         # define tensor shapes
-        n_batches = int(constants.n_samples / self.batch_size)
         node_shape = (self.batch_size, *constants.dim_nodes)
         edge_shape = (self.batch_size, *constants.dim_edges)
-        nlls_shape = (self.batch_size, constants.max_n_nodes * 2 * n_batches)
+        nlls_shape = (self.batch_size, constants.max_n_nodes * 2)  # the 2 is arbitrary
 
         # allocate a buffer equal to the size of an extra batch
-        n_allocate = constants.n_samples + self.batch_size
+        n_allocate = self.batch_size * 2
 
         # create the placeholder tensors:
 
@@ -378,11 +378,10 @@ class GraphGenerator:
             idc (int) : Indices corresponding to graphs to reset.
         """
         # define constants
-        n_batches = int(constants.n_samples / self.batch_size)
         node_shape = ([self.batch_size] + constants.dim_nodes)
         edge_shape = ([self.batch_size] + constants.dim_edges)
         n_nodes_shape = ([self.batch_size])
-        nlls_shape = ([self.batch_size] + [constants.max_n_nodes * 2 * n_batches])
+        nlls_shape = ([self.batch_size] + [constants.max_n_nodes * 2])  # the 2 is arbitrary
 
         # reset the "bad" graphs with zero tensors
         if len(idc) > 0:
