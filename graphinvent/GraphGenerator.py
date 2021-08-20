@@ -422,7 +422,7 @@ class GraphGenerator:
         self.edges[0, 0, 0, 0] = 1
         self.n_nodes[0] = 1
 
-    def reset_graphs(self, idc : int) -> None:
+    def reset_graphs(self, idc : torch.Tensor) -> None:
         """
         Resets the `nodes` and `edges` tensors by reseting graphs which sampled
         invalid actions (indicated by `idc`). Updates the following:
@@ -435,7 +435,7 @@ class GraphGenerator:
 
         Args:
         ----
-            idc (int) : Indices corresponding to graphs to reset.
+            idc (torch.Tensor) : Indices corresponding to graphs to reset.
         """
         # define constants
         node_shape = ([self.batch_size] + constants.dim_nodes)
