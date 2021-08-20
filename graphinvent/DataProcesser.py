@@ -1,3 +1,6 @@
+"""
+The `DataProcesser` class contains functions for pre-processing training data.
+"""
 # load general packages and functions
 import os
 import numpy as np
@@ -12,8 +15,6 @@ import parameters.load as load
 from MolecularGraph import PreprocessingGraph
 import util
 
-# functions for preprocessing training data
-
 
 class DataProcesser:
     """
@@ -23,40 +24,44 @@ class DataProcesser:
         """
         Args:
         ----
-            path (string) : Full path/filename to SMILES file containing molecules.
+            path (string)          : Full path/filename to SMILES file containing
+                                     molecules.
             is_training_set (bool) : Indicates if this is the training set, as we
-              calculate a few additional things for the training set.
+                                     calculate a few additional things for the training
+                                     set.
         """
         # define some variables for later use
-        self.path = path
+        self.path            = path
         self.is_training_set = is_training_set
-        self.dataset_names = ["nodes", "edges", "APDs"]
+        self.dataset_names   = ["nodes", "edges", "APDs"]
         self.get_dataset_dims()  # creates `self.dims`
 
         # load the molecules
         self.molecule_set = load.molecules(self.path)
 
         # placeholders
-        self.molecule_subset = None
-        self.ds = None
-        self.skip_collection = None
-        self.resume_idx = None
-        self.ts_properties = None
+        self.molecule_subset    = None
+        self.dataset            = None
+        self.skip_collection    = None
+        self.resume_idx         = None
+        self.ts_properties      = None
         self.restart_index_file = None
-        self.hdf_file = None
-        self.dataset_size = None
+        self.hdf_file           = None
+        self.dataset_size       = None
 
-        # get total number of molecules, and total number of subgraphs in their decoding routes
-        self.n_molecules = len(self.molecule_set)
+        # get total number of molecules, and total number of subgraphs in their
+        # decoding routes
+        self.n_molecules       = len(self.molecule_set)
         self.total_n_subgraphs = self.get_n_subgraphs()
         print(f"-- {self.n_molecules} molecules in set.", flush=True)
-        print(f"-- {self.total_n_subgraphs} total subgraphs in set.", flush=True)
+        print(f"-- {self.total_n_subgraphs} total subgraphs in set.",
+              flush=True)
 
     def preprocess(self) -> None:
         """
         Prepares an HDF file to save three different datasets to it (`nodes`,
-        `edges`, `APDs`), and slowly fills it in by looping over all the molecules
-        in the data in groups (or "mini-batches").
+        `edges`, `APDs`), and slowly fills it in by looping over all the
+        molecules in the data in groups (or "mini-batches").
         """
         with h5py.File(f"{self.path[:-3]}h5.chunked", "a") as self.hdf_file:
 
@@ -66,26 +71,31 @@ class DataProcesser:
                 self.restart_preprocessing_job()
             else:
                 self.start_new_preprocessing_job()
-                self.dataset_size = 0  # keep track of the dataset size (to resize later)
+
+                # keep track of the dataset size (to resize later)
+                self.dataset_size = 0
 
             self.ts_properties = None
 
-            # this is where we fill the datasets with actual data by looping over
-            # subgraphs in blocks of size `constants.batch_size`
+            # this is where we fill the datasets with actual data by looping
+            # over subgraphs in blocks of size `constants.batch_size`
             for idx in range(0, self.total_n_subgraphs, constants.batch_size):
 
                 if not self.skip_collection:
 
                     self.get_molecule_subset()
 
-                    # add `constants.batch_size` subgraphs from `self.molecule_subset` to
-                    # the dataset (and if training set, calculate their properties
-                    # and add these to `self.ts_properties`)
+                    # add `constants.batch_size` subgraphs from
+                    # `self.molecule_subset` to the dataset (and if training
+                    # set, calculate their properties and add these to
+                    # `self.ts_properties`)
                     self.get_subgraphs(init_idx=idx)
 
-                    util.write_last_molecule_idx(last_molecule_idx=self.resume_idx,
-                                                 dataset_size=self.dataset_size,
-                                                 restart_file_path=constants.dataset_dir)
+                    util.write_last_molecule_idx(
+                        last_molecule_idx=self.resume_idx,
+                        dataset_size=self.dataset_size,
+                        restart_file_path=constants.dataset_dir
+                    )
 
 
                 if self.resume_idx == self.n_molecules:
@@ -97,7 +107,9 @@ class DataProcesser:
                     if self.is_training_set and not constants.restart:
 
                         print("Writing training set properties.", flush=True)
-                        util.write_ts_properties(training_set_properties=self.ts_properties)
+                        util.write_ts_properties(
+                            training_set_properties=self.ts_properties
+                        )
 
                     break
 
@@ -110,62 +122,67 @@ class DataProcesser:
         directory to know where to resume preprocessing.
         """
         try:
-            self.resume_idx, self.dataset_size = util.read_last_molecule_idx(restart_file_path=constants.dataset_dir)
+            self.resume_idx, self.dataset_size = util.read_last_molecule_idx(
+                restart_file_path=constants.dataset_dir
+            )
         except:
             self.resume_idx, self.dataset_size = 0, 0
-        self.skip_collection = bool(self.resume_idx == self.n_molecules and self.is_training_set)
+        self.skip_collection = bool(
+            self.resume_idx == self.n_molecules and self.is_training_set
+        )
 
-        # load dictionary of previously created datasets (`self.ds`)
+        # load dictionary of previously created datasets (`self.dataset`)
         self.load_datasets(hdf_file=self.hdf_file)
 
     def start_new_preprocessing_job(self) -> None:
         """
         Starts a fresh preprocessing job.
         """
-
-        self.resume_idx = 0
+        self.resume_idx      = 0
         self.skip_collection = False
 
-        # create a dictionary of empty HDF datasets (`self.ds`)
+        # create a dictionary of empty HDF datasets (`self.dataset`)
         self.create_datasets(hdf_file=self.hdf_file)
 
     def resave_datasets_unchunked(self) -> None:
         """
-        Resaves the HDF datasets in an unchunked format to remove initial padding.
+        Resaves the HDF datasets in an unchunked format to remove initial
+        padding.
         """
-
         with h5py.File(f"{self.path[:-3]}h5.chunked", "r", swmr=True) as chunked_file:
-            keys = list(chunked_file.keys())
-            data = [chunked_file.get(key)[:] for key in keys]
+            keys        = list(chunked_file.keys())
+            data        = [chunked_file.get(key)[:] for key in keys]
             data_zipped = tuple(zip(data, keys))
 
             with h5py.File(f"{self.path[:-3]}h5", "w") as unchunked_file:
                 for d, k in tqdm(data_zipped):
-                    unchunked_file.create_dataset(k, chunks=None, data=d, dtype=np.dtype("int8"))
+                    unchunked_file.create_dataset(
+                        k, chunks=None, data=d, dtype=np.dtype("int8")
+                    )
 
         # remove the restart file and chunked file (don't need them anymore)
         os.remove(self.restart_index_file)
         os.remove(f"{self.path[:-3]}h5.chunked")
 
-
     def get_subgraphs(self, init_idx : int) -> None:
         """
-        Adds `constants.batch_size` subgraphs from `self.molecule_subset` to the HDF dataset
-        (and if currently processing the training set, also calculates the full
-        graphs' properties and adds these to `self.ts_properties`).
+        Adds `constants.batch_size` subgraphs from `self.molecule_subset` to the
+        HDF dataset (and if currently processing the training set, also
+        calculates the full graphs' properties and adds these to
+        `self.ts_properties`).
 
         Args:
         ----
             init_idx (int) : As analysis is done in blocks/slices, `init_idx` is
-              the start index for the next block/slice to be taken from
-              `self.molecule_subset`.
+                             the start index for the next block/slice to be taken
+                             from `self.molecule_subset`.
         """
         data_subgraphs, data_apds, molecular_graph_list = [], [], []  # initialize
 
         # convert all molecules in `self.molecules_subset` to `PreprocessingGraphs`
         molecular_graph_generator = map(self.get_graph, self.molecule_subset)
 
-        molecules_processed = 0  # keep track of the number of molecules processed
+        molecules_processed       = 0  # keep track of the number of molecules processed
 
         # loop over all the `PreprocessingGraph`s
         for graph in molecular_graph_generator:
@@ -175,12 +192,14 @@ class DataProcesser:
             molecular_graph_list.append(graph)
 
             # get the number of decoding graphs
-            n_SGs = graph.get_decoding_route_length()
+            n_subgraphs = graph.get_decoding_route_length()
 
-            for new_SG_idx in range(n_SGs):
+            for new_subgraph_idx in range(n_subgraphs):
 
                 # `get_decoding_route_state() returns a list of [`subgraph`, `apd`],
-                subgraph, apd = graph.get_decoding_route_state(subgraph_idx=new_SG_idx)
+                subgraph, apd = graph.get_decoding_route_state(
+                    subgraph_idx=new_subgraph_idx
+                )
 
                 # "collect" all APDs corresponding to pre-existing subgraphs,
                 # otherwise append both new subgraph and new APD
@@ -188,8 +207,9 @@ class DataProcesser:
                 for idx, existing_subgraph in enumerate(data_subgraphs):
 
                     count += 1
-                    # check if subgraph `subgraph` is "already" in `data_subgraphs` as
-                    # `existing_subgraph`, and if so, add the "new" APD to the "old"
+                    # check if subgraph `subgraph` is "already" in
+                    # `data_subgraphs` as `existing_subgraph`, and if so, add
+                    # the "new" APD to the "old"
                     try:  # first compare the node feature matrices
                         nodes_equal = (subgraph[0] == existing_subgraph[0]).all()
                     except AttributeError:
@@ -202,8 +222,6 @@ class DataProcesser:
                     # if both matrices have a match, then subgraphs are the same
                     if nodes_equal and edges_equal:
                         existing_apd = data_apds[idx]
-
-                        # add APDs
                         existing_apd += apd
                         break
 
@@ -212,8 +230,8 @@ class DataProcesser:
                     data_subgraphs.append(subgraph)
                     data_apds.append(apd)
 
-                # if `constants.batch_size` unique subgraphs have been processed, save
-                # group to the HDF dataset
+                # if `constants.batch_size` unique subgraphs have been
+                # processed, save group to the HDF dataset
                 len_data_subgraphs = len(data_subgraphs)
                 if len_data_subgraphs == constants.batch_size:
                     self.save_group(data_subgraphs=data_subgraphs,
@@ -225,15 +243,18 @@ class DataProcesser:
                     self.get_ts_properties(molecular_graphs=molecular_graph_list,
                                            group_size=constants.batch_size)
 
-                    # keep track of the last molecule to be processed in `self.resume_idx`
-                    self.resume_idx += molecules_processed  # number of molecules processed
-                    self.dataset_size += constants.batch_size       # subgraphs processed
+                    # keep track of the last molecule to be processed in
+                    # `self.resume_idx`
+                    # number of molecules processed:
+                    self.resume_idx   += molecules_processed
+                    # subgraphs processed:
+                    self.dataset_size += constants.batch_size
 
                     return None
 
         n_processed_subgraphs = len(data_subgraphs)
 
-        # save group with < `constants.batch_size` subgraphs (e.g. the last block)
+        # save group with < `constants.batch_size` subgraphs (e.g. last block)
         self.save_group(data_subgraphs=data_subgraphs,
                         data_apds=data_apds,
                         group_size=n_processed_subgraphs,
@@ -244,62 +265,58 @@ class DataProcesser:
                                group_size=constants.batch_size)
 
         # keep track of the last molecule to be processed in `self.resume_idx`
-        self.resume_idx += molecules_processed  # number of molecules processed
-        self.dataset_size += constants.batch_size       # subgraphs processed
+        self.resume_idx   += molecules_processed   # number of molecules processed
+        self.dataset_size += constants.batch_size  # subgraphs processed
 
         return None
 
-
     def create_datasets(self, hdf_file : h5py._hl.files.File) -> None:
         """
-        Creates a dictionary of HDF5 datasets (`self.ds`).
+        Creates a dictionary of HDF5 datasets (`self.dataset`).
 
         Args:
         ----
-            hdf_file (h5py._hl.files.File) : HDF5 file which will contain datasets.
+            hdf_file (h5py._hl.files.File) : HDF5 file which will contain the datasets.
         """
-        self.ds = {}  # initialize
+        self.dataset = {}  # initialize
 
         for ds_name in self.dataset_names:
-            self.ds[ds_name] = hdf_file.create_dataset(
+            self.dataset[ds_name] = hdf_file.create_dataset(
                 ds_name,
                 (self.total_n_subgraphs, *self.dims[ds_name]),
                 chunks=True,  # must be True for resizing later
                 dtype=np.dtype("int8")
             )
 
-
     def resize_datasets(self) -> None:
         """
-        Resizes the HDF datasets, since much longer datasets are initialized when
-        first creating the HDF datasets (it it is impossible to predict how many
-        graphs will be equivalent beforehand).
+        Resizes the HDF datasets, since much longer datasets are initialized
+        when first creating the HDF datasets (it it is impossible to predict
+        how many graphs will be equivalent beforehand).
         """
         for dataset_name in self.dataset_names:
             try:
-                self.ds[dataset_name].resize(
+                self.dataset[dataset_name].resize(
                     (self.dataset_size, *self.dims[dataset_name]))
             except KeyError:  # `f_term` has no extra dims
-                self.ds[dataset_name].resize((self.dataset_size,))
-
+                self.dataset[dataset_name].resize((self.dataset_size,))
 
     def get_dataset_dims(self) -> None:
         """
         Calculates the dimensions of the node features, edge features, and APDs,
-        and stores them as lists in a dict (`self.dims`), where keys are the dataset
-        name.
+        and stores them as lists in a dict (`self.dims`), where keys are the
+        dataset name.
 
         Shapes:
         ------
             dims["nodes"] : [max N nodes, N atom types + N formal charges]
             dims["edges"] : [max N nodes, max N nodes, N bond types]
-            dims["APDs"] : [APD length = f_add length + f_conn length + f_term length]
+            dims["APDs"]  : [APD length = f_add length + f_conn length + f_term length]
         """
         self.dims = {}
         self.dims["nodes"] = constants.dim_nodes
         self.dims["edges"] = constants.dim_edges
-        self.dims["APDs"] = constants.dim_apd
-
+        self.dims["APDs"]  = constants.dim_apd
 
     def get_graph(self, mol : rdkit.Chem.Mol) -> PreprocessingGraph:
         """
@@ -316,22 +333,21 @@ class DataProcesser:
         if mol is not None:
             if not constants.use_aromatic_bonds:
                 rdkit.Chem.Kekulize(mol, clearAromaticFlags=True)
-            molecular_graph = PreprocessingGraph(molecule=mol, constants=constants)
-
+            molecular_graph = PreprocessingGraph(molecule=mol,
+                                                 constants=constants)
         return molecular_graph
-
 
     def get_molecule_subset(self) -> None:
         """
-        Slices `self.molecule_set` into a subset of molecules of size `constants.batch_size`,
-        starting from `self.resume_idx`. `self.n_molecules` is the number of molecules
-        in the full `self.molecule_set`.
+        Slices `self.molecule_set` into a subset of molecules of size
+        `constants.batch_size`, starting from `self.resume_idx`.
+        `self.n_molecules` is the number of molecules in the full
+        `self.molecule_set`.
         """
-        init_idx=self.resume_idx
-        subset_size=constants.batch_size
-
+        init_idx             = self.resume_idx
+        subset_size          = constants.batch_size
         self.molecule_subset = []
-        max_idx = min(init_idx + subset_size, self.n_molecules)
+        max_idx              = min(init_idx + subset_size, self.n_molecules)
 
         count = -1
         for mol in self.molecule_set:
@@ -344,18 +360,17 @@ class DataProcesser:
                 else:
                     self.molecule_subset.append(mol)
 
-
     def get_n_subgraphs(self) -> int:
         """
         Calculates the total number of subgraphs in the decoding route of all
-        molecules in `self.molecule_set`. Loads training, testing, or validation set.
-        First, the `PreprocessingGraph` for each molecule is obtained, and then the
-        length of the decoding route is trivially calculated for each.
+        molecules in `self.molecule_set`. Loads training, testing, or validation
+        set. First, the `PreprocessingGraph` for each molecule is obtained, and
+        then the length of the decoding route is trivially calculated for each.
 
         Returns:
         -------
             n_subgraphs (int) : Sum of number of subgraphs in decoding routes for
-              all molecules in `self.molecule_set`.
+                                all molecules in `self.molecule_set`.
         """
         n_subgraphs = 0  # start the count
 
@@ -371,8 +386,8 @@ class DataProcesser:
 
         return int(n_subgraphs)
 
-
-    def get_ts_properties(self, molecular_graphs : list, group_size : int) -> None:
+    def get_ts_properties(self, molecular_graphs : list, group_size : int) -> \
+        None:
         """
         Gets molecular properties for group of molecular graphs, only for the
         training set.
@@ -380,12 +395,14 @@ class DataProcesser:
         Args:
         ----
             molecular_graphs (list) : Contains `PreprocessingGraph`s.
-            group_size (int) : Size of "group" (i.e. slice of graphs).
+            group_size (int)        : Size of "group" (i.e. slice of graphs).
         """
         if self.is_training_set:
 
-            analyzer = Analyzer()
-            ts_properties = analyzer.evaluate_training_set(preprocessing_graphs=molecular_graphs)
+            analyzer      = Analyzer()
+            ts_properties = analyzer.evaluate_training_set(
+                preprocessing_graphs=molecular_graphs
+            )
 
             # merge properties of current group with the previous group analyzed
             if self.ts_properties:  # `self.ts_properties` is a dictionary
@@ -399,22 +416,20 @@ class DataProcesser:
         else:
             self.ts_properties = None
 
-
     def load_datasets(self, hdf_file : h5py._hl.files.File) -> None:
         """
-        Creates a dictionary of HDF datasets (`self.ds`) which have been previously
-        created (for restart jobs only).
+        Creates a dictionary of HDF datasets (`self.dataset`) which have been
+        previously created (for restart jobs only).
 
         Args:
         ----
             hdf_file (h5py._hl.files.File) : HDF file containing all the datasets.
         """
-        self.ds = {}  # initialize dictionary of datasets
+        self.dataset = {}  # initialize dictionary of datasets
 
-        # use the names of the datasets as the keys in `self.ds`
+        # use the names of the datasets as the keys in `self.dataset`
         for ds_name in self.dataset_names:
-            self.ds[ds_name] = hdf_file.get(ds_name)
-
+            self.dataset[ds_name] = hdf_file.get(ds_name)
 
     def save_group(self, data_subgraphs : list, data_apds : list,
                    group_size : int, init_idx : int) -> None:
@@ -425,18 +440,18 @@ class DataProcesser:
         Args:
         ----
             data_subgraphs (list) : Contains molecular subgraphs.
-            data_apds (list) : Contains APDs.
-            group_size (int) : Size of HDF "slice".
-            init_idx (int) : Index to begin slicing.
+            data_apds (list)      : Contains APDs.
+            group_size (int)      : Size of HDF "slice".
+            init_idx (int)        : Index to begin slicing.
         """
         # convert to `np.ndarray`s
         nodes = np.array([graph_tuple[0] for graph_tuple in data_subgraphs])
         edges = np.array([graph_tuple[1] for graph_tuple in data_subgraphs])
-        apds = np.array(data_apds)
+        apds  = np.array(data_apds)
 
         end_idx = init_idx + group_size  # idx to end slicing
 
         # once data is padded, save it to dataset slice
-        self.ds["nodes"][init_idx:end_idx] = nodes
-        self.ds["edges"][init_idx:end_idx] = edges
-        self.ds["APDs"][init_idx:end_idx] = apds
+        self.dataset["nodes"][init_idx:end_idx] = nodes
+        self.dataset["edges"][init_idx:end_idx] = edges
+        self.dataset["APDs"][init_idx:end_idx]  = apds

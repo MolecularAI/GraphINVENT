@@ -1,7 +1,7 @@
-# load general packages and functions
+"""
+Defines `ArgumentParser` for specifying job directory using command-line.
+"""# load general packages and functions
 import argparse
-
-# defines `ArgumentParser` for specifying job directory using command-line
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,

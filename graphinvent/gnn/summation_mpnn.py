@@ -1,3 +1,6 @@
+"""
+Defines the `SummationMPNN` class.
+"""
 # load general packages and functions
 from collections import namedtuple
 import torch
@@ -13,10 +16,10 @@ class SummationMPNN(torch.nn.Module):
         super().__init__()
 
         self.hidden_node_features = constants.hidden_node_features
-        self.edge_features = constants.n_edge_features
-        self.message_size = constants.message_size
-        self.message_passes = constants.message_passes
-        self.constants = constants
+        self.edge_features        = constants.n_edge_features
+        self.message_size         = constants.message_size
+        self.message_passes       = constants.message_passes
+        self.constants            = constants
 
     def message_terms(self, nodes : torch.Tensor, node_neighbours : torch.Tensor,
                       edges : torch.Tensor) -> None:
@@ -25,15 +28,15 @@ class SummationMPNN(torch.nn.Module):
 
         Args:
         ----
-            nodes (torch.Tensor) : Batch of node feature vectors.
+            nodes (torch.Tensor)           : Batch of node feature vectors.
             node_neighbours (torch.Tensor) : Batch of node feature vectors for neighbors.
-            edges (torch.Tensor) : Batch of edge feature vectors.
+            edges (torch.Tensor)           : Batch of edge feature vectors.
 
         Shapes:
         ------
-            nodes : (total N nodes in batch, N node features)
+            nodes           : (total N nodes in batch, N node features)
             node_neighbours : (total N nodes in batch, max node degree, N node features)
-            edges : (total N nodes in batch, max node degree, N edge features)
+            edges           : (total N nodes in batch, max node degree, N edge features)
         """
         raise NotImplementedError
 
@@ -43,12 +46,12 @@ class SummationMPNN(torch.nn.Module):
 
         Args:
         ----
-            nodes (torch.Tensor) : Batch of node feature vectors.
+            nodes (torch.Tensor)    : Batch of node feature vectors.
             messages (torch.Tensor) : Batch of incoming messages.
 
         Shapes:
         ------
-            nodes : (total N nodes in batch, N node features)
+            nodes    : (total N nodes in batch, N node features)
             messages : (total N nodes in batch, N node features)
         """
         raise NotImplementedError
@@ -62,8 +65,9 @@ class SummationMPNN(torch.nn.Module):
         ----
             hidden_nodes (torch.Tensor) : Batch of node feature vectors.
             input_nodes (torch.Tensor) : Batch of node feature vectors.
-            node_mask (torch.Tensor) : Mask for non-existing neighbors, where elements are 1
-              if corresponding element exists and 0 otherwise.
+            node_mask (torch.Tensor) : Mask for non-existing neighbors, where elements
+                                       are 1 if corresponding element exists and 0
+                                       otherwise.
 
         Shapes:
         ------
@@ -90,23 +94,22 @@ class SummationMPNN(torch.nn.Module):
         Returns:
         -------
             output (torch.Tensor) : This would normally be the learned graph representation,
-              but in all MPNN readout functions in this work, the last layer is used to
-              predict the action probability distribution for a batch of graphs from the learned
-              graph representation.
+                                    but in all MPNN readout functions in this work,
+                                    the last layer is used to predict the action
+                                    probability distribution for a batch of graphs
+                                    from the learned graph representation.
         """
         adjacency = torch.sum(edges, dim=3)
 
         # **note: "idc" == "indices", "nghb{s}" == "neighbour(s)"
-        (
-            edge_batch_batch_idc,
-            edge_batch_node_idc,
-            edge_batch_nghb_idc,
-        ) = adjacency.nonzero(as_tuple=True)
+        (edge_batch_batch_idc,
+         edge_batch_node_idc,
+         edge_batch_nghb_idc) = adjacency.nonzero(as_tuple=True)
 
         (node_batch_batch_idc, node_batch_node_idc) = adjacency.sum(-1).nonzero(as_tuple=True)
 
         same_batch = node_batch_batch_idc.view(-1, 1) == edge_batch_batch_idc
-        same_node = node_batch_node_idc.view(-1, 1) == edge_batch_node_idc
+        same_node  = node_batch_node_idc.view(-1, 1) == edge_batch_node_idc
 
         # element ij of `message_summation_matrix` is 1 if `edge_batch_edges[j]`
         # is connected with `node_batch_nodes[i]`, else 0
@@ -127,9 +130,9 @@ class SummationMPNN(torch.nn.Module):
 
             edge_batch_nghbs = hidden_nodes[edge_batch_batch_idc, edge_batch_nghb_idc, :]
 
-            message_terms = self.message_terms(edge_batch_nodes,
-                                               edge_batch_nghbs,
-                                               edge_batch_edges)
+            message_terms    = self.message_terms(edge_batch_nodes,
+                                                  edge_batch_nghbs,
+                                                  edge_batch_edges)
 
             if len(message_terms.size()) == 1:  # if a single graph in batch
                 message_terms = message_terms.unsqueeze(0)
@@ -141,7 +144,6 @@ class SummationMPNN(torch.nn.Module):
             hidden_nodes[node_batch_batch_idc, node_batch_node_idc, :] = node_batch_nodes.clone()
 
         node_mask = adjacency.sum(-1) != 0
-
-        output = self.readout(hidden_nodes, nodes, node_mask)
+        output    = self.readout(hidden_nodes, nodes, node_mask)
 
         return output

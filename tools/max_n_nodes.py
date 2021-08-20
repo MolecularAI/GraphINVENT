@@ -1,13 +1,12 @@
-import argparse
-import rdkit
-from utils import load_molecules
-
 """
 Gets the maximum number of nodes per molecule present in a set of molecules.
 
 To use script, run:
 python max_n_nodes.py --smi path/to/file.smi
 """
+import argparse
+from utils import load_molecules
+
 
 # define the argument parser
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,

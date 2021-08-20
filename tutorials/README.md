@@ -13,6 +13,7 @@ This directory contains guides on how to use GraphINVENT. If viewing in a browse
 * [4_transfer_learning](./4_transfer_learning.md) : A guide on how to use GraphINVENT for transfer learning tasks.
 * [5_benchmarking_with_moses](./5_benchmarking_with_moses.md) : A guide on how to benchmark GraphINVENT models using the MOSES distribution-based benchmarks.
 * [6_preprocessing_large_datasets](./6_preprocessing_large_datasets.md) : A guide on how to preprocess large datasets in GraphINVENT.
+* [7_reinforcement_learning](./7_reinforcement_learning.md) : A guide on how to fine-tune GraphINVENT models for molecular optimization and *de novo* design tasks. [TODO]
 
 ## Comments
 If a tutorial doesn't exist for something you'd like to do, contact [me](https://github.com/rociomer) and I'll be happy to create one (if I think others would benefit from it and I have time). Similarly, if you find and error in a tutorial, please let me know so that I can correct it.

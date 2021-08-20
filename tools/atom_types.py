@@ -1,13 +1,12 @@
-import argparse
-import rdkit
-from utils import load_molecules
-
 """
 Gets the atom types present in a set of molecules.
 
 To use script, run:
 python atom_types.py --smi path/to/file.smi
 """
+import argparse
+import rdkit
+from utils import load_molecules
 
 
 # define the argument parser

@@ -1,0 +1,11 @@
+('Training set', 'n_nodes_hist');[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.064, 1.414, 9.493, 53.61]
+('Training set', 'avg_n_nodes');12.787
+('Training set', 'atom_type_hist');[589.076, 125.834, 104.132, 7.85, 0.137]
+('Training set', 'formal_charge_hist');[0.25, 826.53, 0.25]
+('Training set', 'n_edges_hist');[187.398, 361.517, 236.11, 42.004, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+('Training set', 'avg_n_edges');2.164
+('Training set', 'edge_feature_hist');[752.936, 127.018, 13.436]
+('Training set', 'fraction_unique');0.0
+('Training set', 'fraction_valid');1.0
+('Training set', 'numh_hist');[]
+('Training set', 'chirality_hist');[]

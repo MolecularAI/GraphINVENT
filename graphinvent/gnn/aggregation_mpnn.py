@@ -1,3 +1,6 @@
+"""
+Defines the `AggregationMPNN` class.
+"""
 # load general packages and functions
 from collections import  namedtuple
 import torch
@@ -12,10 +15,10 @@ class AggregationMPNN(torch.nn.Module):
         super().__init__()
 
         self.hidden_node_features = constants.hidden_node_features
-        self.edge_features = constants.n_edge_features
-        self.message_size = constants.message_size
-        self.message_passes = constants.message_passes
-        self.constants = constants
+        self.edge_features        = constants.n_edge_features
+        self.message_size         = constants.message_size
+        self.message_passes       = constants.message_passes
+        self.constants            = constants
 
     def aggregate_message(self, nodes : torch.Tensor, node_neighbours : torch.Tensor,
                           edges : torch.Tensor, mask : torch.Tensor) -> None:
@@ -24,18 +27,19 @@ class AggregationMPNN(torch.nn.Module):
 
         Args:
         ----
-            nodes (torch.Tensor) : Batch of node feature vectors.
+            nodes (torch.Tensor)           : Batch of node feature vectors.
             node_neighbours (torch.Tensor) : Batch of node feature vectors for neighbors.
-            edges (torch.Tensor) : Batch of edge feature vectors.
-            mask (torch.Tensor) : Mask for non-existing neighbors, where elements are 1 if
-              corresponding element exists and 0 otherwise.
+            edges (torch.Tensor)           : Batch of edge feature vectors.
+            mask (torch.Tensor)            : Mask for non-existing neighbors, where
+                                             elements are 1 if corresponding element
+                                             exists and 0 otherwise.
 
         Shapes:
         ------
-            nodes : (total N nodes in batch, N node features)
+            nodes           : (total N nodes in batch, N node features)
             node_neighbours : (total N nodes in batch, max node degree, N node features)
-            edges : (total N nodes in batch, max node degree, N edge features)
-            mask : (total N nodes in batch, max node degree)
+            edges           : (total N nodes in batch, max node degree, N edge features)
+            mask            : (total N nodes in batch, max node degree)
         """
         raise NotImplementedError
 
@@ -45,12 +49,12 @@ class AggregationMPNN(torch.nn.Module):
 
         Args:
         ----
-            nodes (torch.Tensor) : Batch of node feature vectors.
+            nodes (torch.Tensor)    : Batch of node feature vectors.
             messages (torch.Tensor) : Batch of incoming messages.
 
         Shapes:
         ------
-            nodes : (total N nodes in batch, N node features)
+            nodes    : (total N nodes in batch, N node features)
             messages : (total N nodes in batch, N node features)
         """
         raise NotImplementedError
@@ -63,15 +67,16 @@ class AggregationMPNN(torch.nn.Module):
         Args:
         ----
             hidden_nodes (torch.Tensor) : Batch of node feature vectors.
-            input_nodes (torch.Tensor) : Batch of node feature vectors.
-            node_mask (torch.Tensor) : Mask for non-existing neighbors, where elements are 1
-              if corresponding element exists and 0 otherwise.
+            input_nodes (torch.Tensor)  : Batch of node feature vectors.
+            node_mask (torch.Tensor)    : Mask for non-existing neighbors, where
+                                          elements are 1 if corresponding element
+                                          exists and 0 otherwise.
 
         Shapes:
         ------
             hidden_nodes : (total N nodes in batch, N node features)
-            input_nodes : (total N nodes in batch, N node features)
-            node_mask : (total N nodes in batch, N features)
+            input_nodes  : (total N nodes in batch, N node features)
+            node_mask    : (total N nodes in batch, N features)
         """
         raise NotImplementedError
 
@@ -91,10 +96,11 @@ class AggregationMPNN(torch.nn.Module):
 
         Returns:
         -------
-            output (torch.Tensor) : This would normally be the learned graph representation,
-              but in all MPNN readout functions in this work, the last layer is used to
-              predict the action probability distribution for a batch of graphs from the learned
-              graph representation.
+            output (torch.Tensor) : This would normally be the learned graph
+                                    representation, but in all MPNN readout functions
+                                    in this work, the last layer is used to predict
+                                    the action probability distribution for a batch
+                                    of graphs from the learned graph representation.
         """
         adjacency = torch.sum(edges, dim=3)
 
@@ -103,20 +109,19 @@ class AggregationMPNN(torch.nn.Module):
             adjacency.nonzero(as_tuple=True)
 
         node_batch_batch_idc, node_batch_node_idc = adjacency.sum(-1).nonzero(as_tuple=True)
-        node_batch_adj = adjacency[node_batch_batch_idc, node_batch_node_idc, :]
-
+        node_batch_adj  = adjacency[node_batch_batch_idc, node_batch_node_idc, :]
         node_batch_size = node_batch_batch_idc.shape[0]
-        node_degrees = node_batch_adj.sum(-1).long()
+        node_degrees    = node_batch_adj.sum(-1).long()
         max_node_degree = node_degrees.max()
 
         node_batch_node_nghbs = torch.zeros(node_batch_size,
                                             max_node_degree,
                                             self.hidden_node_features,
                                             device=self.constants.device)
-        node_batch_edges = torch.zeros(node_batch_size,
-                                       max_node_degree,
-                                       self.edge_features,
-                                       device=self.constants.device)
+        node_batch_edges      = torch.zeros(node_batch_size,
+                                            max_node_degree,
+                                            self.edge_features,
+                                            device=self.constants.device)
 
         node_batch_nghb_nghb_idc = torch.cat(
             [torch.arange(i) for i in node_degrees]

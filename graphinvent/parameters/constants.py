@@ -1,36 +1,36 @@
+"""
+Loads input parameters from `defaults.py`, and defines other global constants
+that depend on the input features, creating a `namedtuple` from them;
+additionally, if there exists an `input.csv` in the job directory, loads those
+arguments and overrides default values in `defaults.py`.
+"""
 # load general packages and functions
 from collections import namedtuple
+import pickle
 import csv
 import os
 import sys
 from typing import Tuple
 import numpy as np
-import rdkit
 from rdkit.Chem.rdchem import BondType
 
 # load GraphINVENT-specific functions
 sys.path.insert(1, "./parameters/")  # search "parameters/" directory
 import parameters.args as args
 import parameters.defaults as defaults
-import parameters.load as load
-
-# loads input parameters from `features.py`, and defines other global constants that depend on
-# the input features, creating a `namedtuple` from them; additionally, if there exists an
-# `input.csv` in the job directory, loads those arguments and overrides default values
-
 
 
 def get_feature_dimensions(parameters : dict) -> Tuple[int, int, int, int]:
     """
     Returns dimensions of all node features.
     """
-    n_atom_types = len(parameters["atom_types"])
+    n_atom_types    = len(parameters["atom_types"])
     n_formal_charge = len(parameters["formal_charge"])
-    n_numh = int(
-        not parameters["use_explicit_H"]
-        and not parameters["ignore_H"]
-    ) * len(parameters["imp_H"])
-    n_chirality = int(parameters["use_chirality"]) * len(parameters["chirality"])
+    n_numh          = (
+        int(not parameters["use_explicit_H"] and not parameters["ignore_H"])
+        * len(parameters["imp_H"])
+    )
+    n_chirality     = int(parameters["use_chirality"]) * len(parameters["chirality"])
 
     return n_atom_types, n_formal_charge, n_numh, n_chirality
 
@@ -39,9 +39,10 @@ def get_tensor_dimensions(n_atom_types : int, n_formal_charge : int, n_num_h : i
                           n_chirality : int, n_node_features : int, n_edge_features : int,
                           parameters : dict) -> Tuple[list, list, list, list, int]:
     """
-    Returns dimensions for all tensors that describe molecular graphs. Tensor dimensions are
-    `list`s, except for `dim_f_term` which is  simply an `int`. Each element of the lists indicate
-    the corresponding dimension of a particular subgraph matrix (i.e. `nodes`, `f_add`, etc).
+    Returns dimensions for all tensors that describe molecular graphs. Tensor dimensions
+    are `list`s, except for `dim_f_term` which is  simply an `int`. Each element
+    of the lists indicate the corresponding dimension of a particular subgraph matrix
+    (i.e. `nodes`, `f_add`, etc).
     """
     max_nodes = parameters["max_n_nodes"]
 
@@ -139,7 +140,7 @@ def collect_global_constants(parameters : dict, job_dir : str) -> namedtuple:
     Args:
     ----
         parameters (dict) : Dictionary of parameters defined in `features.py`.
-        job_dir (str) : Current job directory, defined on the command line.
+        job_dir (str)     : Current job directory, defined on the command line.
 
     Returns:
     -------
@@ -147,11 +148,12 @@ def collect_global_constants(parameters : dict, job_dir : str) -> namedtuple:
     """
     # first override any arguments from `input.csv`:
     parameters["job_dir"] = job_dir
-    parameters= override_params(all_params=parameters)
+    parameters            = override_params(all_params=parameters)
 
     # then calculate any global constants below:
     if parameters["use_explicit_H"] and parameters["ignore_H"]:
-        raise ValueError("Cannot use explicit Hs and ignore Hs at the same time. Please fix flags.")
+        raise ValueError("Cannot use explicit Hs and ignore Hs at "
+                         "the same time. Please fix flags.")
 
     # define edge feature (rdkit `GetBondType()` result -> `int`) constants
     bondtype_to_int = {BondType.SINGLE: 0, BondType.DOUBLE: 1, BondType.TRIPLE: 2}
@@ -169,43 +171,42 @@ def collect_global_constants(parameters : dict, job_dir : str) -> namedtuple:
     n_node_features = n_atom_types + n_formal_charge + n_imp_H + n_chirality
 
     # define matrix dimensions
-    dim_nodes, dim_edges, dim_f_add, dim_f_conn, dim_f_term = get_tensor_dimensions(
-        n_atom_types,
-        n_formal_charge,
-        n_imp_H,
-        n_chirality,
-        n_node_features,
-        n_edge_features,
-        parameters,
-    )
+    (dim_nodes, dim_edges, dim_f_add,
+     dim_f_conn, dim_f_term) = get_tensor_dimensions(n_atom_types,
+                                                     n_formal_charge,
+                                                     n_imp_H,
+                                                     n_chirality,
+                                                     n_node_features,
+                                                     n_edge_features,
+                                                     parameters)
 
-    len_f_add = np.prod(dim_f_add[:])
-    len_f_add_per_node = np.prod(dim_f_add[1:])
-    len_f_conn = np.prod(dim_f_conn[:])
+    len_f_add           = np.prod(dim_f_add[:])
+    len_f_add_per_node  = np.prod(dim_f_add[1:])
+    len_f_conn          = np.prod(dim_f_conn[:])
     len_f_conn_per_node = np.prod(dim_f_conn[1:])
 
     # create a dictionary of global constants, and add `job_dir` to it; this
     # will ultimately be converted to a `namedtuple`
     constants_dict = {
-        "big_negative": -1e6,
-        "big_positive": 1e6,
-        "bondtype_to_int": bondtype_to_int,
-        "int_to_bondtype": int_to_bondtype,
-        "n_edge_features": n_edge_features,
-        "n_atom_types": n_atom_types,
-        "n_formal_charge": n_formal_charge,
-        "n_imp_H": n_imp_H,
-        "n_chirality": n_chirality,
-        "n_node_features": n_node_features,
-        "dim_nodes": dim_nodes,
-        "dim_edges": dim_edges,
-        "dim_f_add": dim_f_add,
-        "dim_f_conn": dim_f_conn,
-        "dim_f_term": dim_f_term,
-        "dim_apd": [np.prod(dim_f_add) + np.prod(dim_f_conn) + 1],
-        "len_f_add": len_f_add,
-        "len_f_add_per_node": len_f_add_per_node,
-        "len_f_conn": len_f_conn,
+        "big_negative"       : -1e6,
+        "big_positive"       : 1e6,
+        "bondtype_to_int"    : bondtype_to_int,
+        "int_to_bondtype"    : int_to_bondtype,
+        "n_edge_features"    : n_edge_features,
+        "n_atom_types"       : n_atom_types,
+        "n_formal_charge"    : n_formal_charge,
+        "n_imp_H"            : n_imp_H,
+        "n_chirality"        : n_chirality,
+        "n_node_features"    : n_node_features,
+        "dim_nodes"          : dim_nodes,
+        "dim_edges"          : dim_edges,
+        "dim_f_add"          : dim_f_add,
+        "dim_f_conn"         : dim_f_conn,
+        "dim_f_term"         : dim_f_term,
+        "dim_apd"            : [np.prod(dim_f_add) + np.prod(dim_f_conn) + 1],
+        "len_f_add"          : len_f_add,
+        "len_f_add_per_node" : len_f_add_per_node,
+        "len_f_conn"         : len_f_conn,
         "len_f_conn_per_node": len_f_conn_per_node,
     }
 
@@ -213,8 +214,8 @@ def collect_global_constants(parameters : dict, job_dir : str) -> namedtuple:
     constants_dict.update(parameters)
 
     # define path to dataset splits
-    constants_dict["test_set"] = parameters["dataset_dir"] + "test.smi"
-    constants_dict["training_set"] = parameters["dataset_dir"] + "train.smi"
+    constants_dict["test_set"]       = parameters["dataset_dir"] + "test.smi"
+    constants_dict["training_set"]   = parameters["dataset_dir"] + "train.smi"
     constants_dict["validation_set"] = parameters["dataset_dir"] + "valid.smi"
 
     # check (if a job is not a preprocessing job) that parameters  match those for
@@ -232,7 +233,7 @@ def collect_global_constants(parameters : dict, job_dir : str) -> namedtuple:
         )
 
         # load preprocessing parameters for comparison (if they exist already)
-        csv_file = parameters["dataset_dir"] + "preprocessing_params.csv"
+        csv_file        = parameters["dataset_dir"] + "preprocessing_params.csv"
         params_to_check = load_params(input_csv_path=csv_file)
 
         for key, value in params_to_check.items():
@@ -244,6 +245,14 @@ def collect_global_constants(parameters : dict, job_dir : str) -> namedtuple:
 
         # if above error never raised, then all relevant parameters match! :)
         print("-- Job parameters match preprocessing parameters.", flush=True)
+
+    # load QSAR models (sklearn activity model)
+    print("-- Loading pre-trained scikit-learn activity model.", flush=True)
+    for qsar_model_name, qsar_model_path in constants_dict["qsar_models"].items():
+        with open(qsar_model_path, 'rb') as file:
+            model_dict                                     = pickle.load(file)
+            activity_model                                 = model_dict["classifier_sv"]
+            constants_dict["qsar_models"][qsar_model_name] = activity_model
 
     # convert `CONSTANTS` dictionary into a namedtuple (immutable + cleaner)
     Constants = namedtuple("CONSTANTS", sorted(constants_dict))

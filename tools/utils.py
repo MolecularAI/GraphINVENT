@@ -1,3 +1,6 @@
+"""
+Miscellaneous functions.
+"""
 import rdkit
 from rdkit.Chem.rdmolfiles import SmilesMolSupplier
 

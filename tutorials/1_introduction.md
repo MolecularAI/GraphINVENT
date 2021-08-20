@@ -135,7 +135,7 @@ params = {
 }
 ```
 
-The *generation_epoch* should correspond to the saved model state that you want to use for generation. In the example above, the parameters specify that the model saved at Epoch 100 should be used to generate 30,000 molecules. All other parameters should be kept the same (if they are related to training, such as *epochs* or *init_lr*, they will be ignored during generation jobs).
+The *generation_epoch* should correspond to the saved model state that you want to use for generation. In the example above, the parameters specify that the model saved at Epoch 400 should be used to generate 30,000 molecules. All other parameters should be kept the same (if they are related to training, such as *epochs* or *init_lr*, they will be ignored during generation jobs).
 
 Structures will be generated in batches of size *batch_size*. If you encounter memory problems during generation jobs, reducing the batch size should once again solve them. Generated structures, along with their corresponding metadata, will be written to the *generation/* directory within the existing job directory. These files are:
 

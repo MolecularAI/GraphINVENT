@@ -1,12 +1,3 @@
-# load general packages and functions
-import numpy as np
-import csv
-import h5py
-import torch
-
-# load GraphINVENT-specific functions
-# (None)
-
 """
 Combines preprocessed HDF files. Useful when preprocessing large datasets, as
 one can split the `train.smi` into multiple files (and directories), preprocess
@@ -29,14 +20,19 @@ with a list of the paths to all the HDFs to combine.
 Then, run:
 python combine_HDFs.py
 """
+import csv
+import numpy as np
+import h5py
+import torch
+
 
 # set variables
-dataset = "moses_canonical"
-n_dirs = 8            # how many times was `train.smi` split?
-n_atom_types = 7      # number of atom types used in preprocessing the data
-n_formal_charges = 1  # number of formal charges used in preprocessing the data
-n_bond_types = 3      # number of bond types used in preprocessing the data
-max_n_nodes = 27      # maximum number of nodes in the data
+dataset          = "moses_canonical"
+n_dirs           = 8    # how many times was `train.smi` split?
+n_atom_types     = 7    # number of atom types used in preprocessing the data
+n_formal_charges = 1    # number of formal charges used in preprocessing the data
+n_bond_types     = 3    # number of bond types used in preprocessing the data
+max_n_nodes      = 27   # maximum number of nodes in the data
 
 # automatically generate a list of the HDF paths
 path_list = [f"data/{dataset}_{i}/train.h5" for i in range(1, n_dirs + 1)]
@@ -51,7 +47,7 @@ def load_ts_properties_from_csv(csv_path : str) -> dict:
 
     # read dictionaries from csv
     with open(csv_path, "r") as csv_file:
-        reader = csv.reader(csv_file, delimiter=";")
+        reader   = csv.reader(csv_file, delimiter=";")
         csv_dict = dict(reader)
 
     # fix file types within dict in going from `csv_dict` --> `properties_dict`
@@ -107,38 +103,35 @@ def get_dims() -> dict:
     dims = {}
     dims["nodes"] = [max_n_nodes, n_atom_types + n_formal_charges]
     dims["edges"] = [max_n_nodes, max_n_nodes, n_bond_types]
-    dim_f_add = [max_n_nodes, n_atom_types, n_formal_charges, n_bond_types]
-    dim_f_conn = [max_n_nodes, n_bond_types]
-    dims["APDs"] = [np.prod(dim_f_add) + np.prod(dim_f_conn) + 1]
+    dim_f_add     = [max_n_nodes, n_atom_types, n_formal_charges, n_bond_types]
+    dim_f_conn    = [max_n_nodes, n_bond_types]
+    dims["APDs"]  = [np.prod(dim_f_add) + np.prod(dim_f_conn) + 1]
 
     return dims
 
-def get_total_n_subgraphs(path_list : list) -> int:
+def get_total_n_subgraphs(paths : list) -> int:
     """
-    Gets the total number of subgraphs saved in all the HDF files in the
-    `path_list`, where `path_list` is a list of strings containing the path
-    to each HDF file we want to combine.
+    Gets the total number of subgraphs saved in all the HDF files in the `paths`,
+    where `paths` is a list of strings containing the path to each HDF file we want
+    to combine.
     """
     total_n_subgraphs = 0
-    for path in path_list:
+    for path in paths:
         print("path:", path)
-        hdf_file = h5py.File(path, "r")
-
-        nodes = hdf_file.get("nodes")
-
-        n_subgraphs = nodes.shape[0]
+        hdf_file           = h5py.File(path, "r")
+        nodes              = hdf_file.get("nodes")
+        n_subgraphs        = nodes.shape[0]
         total_n_subgraphs += n_subgraphs
         hdf_file.close()
 
     return total_n_subgraphs
 
-def main(path_list : list) -> None:
+def main(paths : list) -> None:
     """
-    Combine many small HDF files (their paths defined in `path_list`) into one large HDF file.
+    Combine many small HDF files (their paths defined in `paths`) into one large HDF file.
     """
-    total_n_subgraphs = get_total_n_subgraphs(path_list)
-
-    dims = get_dims()
+    total_n_subgraphs = get_total_n_subgraphs(paths)
+    dims              = get_dims()
 
     print(f"* Creating HDF file to contain {total_n_subgraphs} subgraphs")
     new_hdf_file = h5py.File(f"data/{dataset}/train.h5", "a")
@@ -148,25 +141,25 @@ def main(path_list : list) -> None:
     new_dataset_edges = new_hdf_file.create_dataset("edges",
                                                     (total_n_subgraphs, *dims["edges"]),
                                                     dtype=np.dtype("int8"))
-    new_dataset_APDs = new_hdf_file.create_dataset("APDs",
-                                                   (total_n_subgraphs, *dims["APDs"]),
-                                                   dtype=np.dtype("int8"))
+    new_dataset_APDs  = new_hdf_file.create_dataset("APDs",
+                                                    (total_n_subgraphs, *dims["APDs"]),
+                                                    dtype=np.dtype("int8"))
 
     print("* Combining data from smaller HDFs into a new larger HDF.")
     init_index = 0
-    for path in path_list:
+    for path in paths:
         print("path:", path)
         hdf_file = h5py.File(path, "r")
 
         nodes = hdf_file.get("nodes")
         edges = hdf_file.get("edges")
-        APDs = hdf_file.get("APDs")
+        APDs  = hdf_file.get("APDs")
 
         n_subgraphs = nodes.shape[0]
 
         new_dataset_nodes[init_index:(init_index + n_subgraphs)] = nodes
         new_dataset_edges[init_index:(init_index + n_subgraphs)] = edges
-        new_dataset_APDs[init_index:(init_index + n_subgraphs)] = APDs
+        new_dataset_APDs[init_index:(init_index + n_subgraphs)]  = APDs
 
         init_index += n_subgraphs
         hdf_file.close()
@@ -179,16 +172,22 @@ def main(path_list : list) -> None:
     ts_properties_old = None
     csv_files_processed = 0
     for path in csv_list:
-        ts_properties = load_ts_properties_from_csv(csv_path=path)
+        ts_properties     = load_ts_properties_from_csv(csv_path=path)
         ts_properties_new = {}
         if ts_properties_old:
             for key, value in ts_properties_old.items():
                 if type(value) == float:
-                    ts_properties_new[key] = (value * csv_files_processed + ts_properties[key])/(csv_files_processed + 1)
+                    ts_properties_new[key] = (
+                        value * csv_files_processed + ts_properties[key]
+                    )/(csv_files_processed + 1)
                 else:
                     new_list = []
-                    for i in range(len(value)):
-                        new_list.append(float(value[i] * csv_files_processed + ts_properties[key][i])/(csv_files_processed + 1))
+                    for i, value_i in enumerate(value):
+                        new_list.append(
+                            float(
+                                value_i * csv_files_processed + ts_properties[key][i]
+                            )/(csv_files_processed + 1)
+                        )
                     ts_properties_new[key] = new_list
         else:
             ts_properties_new = ts_properties

@@ -1,13 +1,11 @@
-import argparse
-import rdkit
-from utils import load_molecules
-
 """
 Gets the formal charges present in a set of molecules.
 
 To use script, run:
 python formal_charges.py --smi path/to/file.smi
 """
+import argparse
+from utils import load_molecules
 
 
 # define the argument parser

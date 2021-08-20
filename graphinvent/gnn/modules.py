@@ -1,3 +1,6 @@
+"""
+Defines MPNN modules and readout functions, and APD readout functions.
+"""
 # load general packages and functions
 from collections import namedtuple
 import torch
@@ -5,16 +8,15 @@ import torch
 # load GraphINVENT-specific functions
 # (none)
 
-# defines MPNN modules and readout functions, and APD readout functions
-
 
 class GraphGather(torch.nn.Module):
     """
     GGNN readout function.
     """
-    def __init__(self, node_features : int, hidden_node_features : int, out_features : int,
-                 att_depth : int, att_hidden_dim : int, att_dropout_p : float, emb_depth : int,
-                 emb_hidden_dim : int, emb_dropout_p : float, big_positive : float) -> None:
+    def __init__(self, node_features : int, hidden_node_features : int,
+                 out_features : int, att_depth : int, att_hidden_dim : int,
+                 att_dropout_p : float, emb_depth : int, emb_hidden_dim : int,
+                 emb_dropout_p : float, big_positive : float) -> None:
 
         super().__init__()
 
@@ -39,13 +41,13 @@ class GraphGather(torch.nn.Module):
         """
         Defines forward pass.
         """
-        Softmax = torch.nn.Softmax(dim=1)
+        Softmax     = torch.nn.Softmax(dim=1)
 
-        cat = torch.cat((hidden_nodes, input_nodes), dim=2)
+        cat         = torch.cat((hidden_nodes, input_nodes), dim=2)
         energy_mask = (node_mask == 0).float() * self.big_positive
-        energies = self.att_nn(cat) - energy_mask.unsqueeze(-1)
-        attention = Softmax(energies)
-        embedding = self.emb_nn(hidden_nodes)
+        energies    = self.att_nn(cat) - energy_mask.unsqueeze(-1)
+        attention   = Softmax(energies)
+        embedding   = self.emb_nn(hidden_nodes)
 
         return torch.sum(attention * embedding, dim=1)
 
@@ -54,14 +56,15 @@ class Set2Vec(torch.nn.Module):
     """
     S2V readout function.
     """
-    def __init__(self, node_features : int, hidden_node_features : int, lstm_computations : int,
-                 memory_size : int, constants : namedtuple) -> None:
+    def __init__(self, node_features : int, hidden_node_features : int,
+                 lstm_computations : int, memory_size : int,
+                 constants : namedtuple) -> None:
 
         super().__init__()
 
-        self.constants = constants
+        self.constants         = constants
         self.lstm_computations = lstm_computations
-        self.memory_size = memory_size
+        self.memory_size       = memory_size
 
         self.embedding_matrix = torch.nn.Linear(
             in_features=node_features + hidden_node_features,
@@ -80,29 +83,26 @@ class Set2Vec(torch.nn.Module):
         """
         Defines forward pass.
         """
-        Softmax = torch.nn.Softmax(dim=1)
+        Softmax      = torch.nn.Softmax(dim=1)
 
-        batch_size = input_nodes.shape[0]
-        energy_mask = torch.bitwise_not(node_mask).float() * self.C.big_negative
-
-        lstm_input = torch.zeros(batch_size, self.memory_size, device=self.constants.device)
-
-        cat = torch.cat((hidden_output_nodes, input_nodes), dim=2)
-        memory = self.embedding_matrix(cat)
-
+        batch_size   = input_nodes.shape[0]
+        energy_mask  = torch.bitwise_not(node_mask).float() * self.C.big_negative
+        lstm_input   = torch.zeros(batch_size, self.memory_size, device=self.constants.device)
+        cat          = torch.cat((hidden_output_nodes, input_nodes), dim=2)
+        memory       = self.embedding_matrix(cat)
         hidden_state = torch.zeros(batch_size, self.memory_size, device=self.constants.device)
-        cell_state = torch.zeros(batch_size, self.memory_size, device=self.constants.device)
+        cell_state   = torch.zeros(batch_size, self.memory_size, device=self.constants.device)
 
         for _ in range(self.lstm_computations):
             query, cell_state = self.lstm(lstm_input, (hidden_state, cell_state))
 
             # dot product query x memory
-            energies = (query.view(batch_size, 1, self.memory_size) * memory).sum(dim=-1)
+            energies  = (query.view(batch_size, 1, self.memory_size) * memory).sum(dim=-1)
             attention = Softmax(energies + energy_mask)
-            read = (attention.unsqueeze(-1) * memory).sum(dim=1)
+            read      = (attention.unsqueeze(-1) * memory).sum(dim=1)
 
             hidden_state = query
-            lstm_input = read
+            lstm_input   = read
 
         cat = torch.cat((query, read), dim=1)
         return cat
@@ -114,10 +114,10 @@ class MLP(torch.nn.Module):
 
     Args:
     ----
-        in_features (int) : Size of each input sample.
+        in_features (int)         : Size of each input sample.
         hidden_layer_sizes (list) : Hidden layer sizes.
-        out_features (int) : Size of each output sample.
-        dropout_p (float) : Probability of dropping a weight.
+        out_features (int)        : Size of each output sample.
+        dropout_p (float)         : Probability of dropping a weight.
     """
 
     def __init__(self, in_features : int, hidden_layer_sizes : list, out_features : int,
@@ -144,15 +144,19 @@ class MLP(torch.nn.Module):
     def _linear_block(self, in_f : int, out_f : int, activation : torch.nn.Module,
                       dropout_p : float) -> torch.nn.Sequential:
         """
-        Returns a linear block consisting of a linear layer, an activation function (SELU),
-        and dropout (optional) stack.
+        Returns a linear block consisting of a linear layer, an activation function
+        (SELU), and dropout (optional) stack.
 
         Args:
         ----
-            in_f (int) : Size of each input sample.
-            out_f (int) : Size of each output sample.
+            in_f (int)                   : Size of each input sample.
+            out_f (int)                  : Size of each output sample.
             activation (torch.nn.Module) : Activation function.
-            dropout_p (float) : Probability of dropping a weight.
+            dropout_p (float)            : Probability of dropping a weight.
+
+        Returns:
+        -------
+            torch.nn.Sequential : The linear block.
         """
         # bias must be used in most MLPs in our models to learn from empty graphs
         linear = torch.nn.Linear(in_f, out_f, bias=True)
@@ -168,23 +172,24 @@ class MLP(torch.nn.Module):
 
 class GlobalReadout(torch.nn.Module):
     """
-    Global readout function class. Used to predict the action probability distributions (APDs)
-    for molecular graphs.
+    Global readout function class. Used to predict the action probability distributions
+    (APDs) for molecular graphs.
 
-    The first tier of two `MLP`s take as input, for each graph in the batch, the final transformed
-    node feature vectors. These feed-forward networks correspond to the preliminary "f_add" and
-    "f_conn" distributions.
+    The first tier of two `MLP`s take as input, for each graph in the batch, the
+    final transformed node feature vectors. These feed-forward networks correspond
+    to the preliminary "f_add" and "f_conn" distributions.
 
-    The second tier of three `MLP`s takes as input the output of the first tier of `MLP`s (the
-    "preliminary" APDs) as well as the graph embeddings for all graphs in the batch. Output are
-    the final APD components, which are then flattened and concatenated. No activation function
-    is applied after the final layer, so that this can be done outside (e.g. in the loss function,
-    and before sampling).
+    The second tier of three `MLP`s takes as input the output of the first tier
+    of `MLP`s (the "preliminary" APDs) as well as the graph embeddings for all
+    graphs in the batch. Output are the final APD components, which are then flattened
+    and concatenated. No activation function is applied after the final layer, so
+    that this can be done outside (e.g. in the loss function, and before sampling).
     """
-    def __init__(self, f_add_elems : int, f_conn_elems : int, f_term_elems : int, mlp1_depth : int,
-                 mlp1_dropout_p : float, mlp1_hidden_dim : int, mlp2_depth : int,
-                 mlp2_dropout_p : float, mlp2_hidden_dim : int, graph_emb_size : int,
-                 max_n_nodes : int, node_emb_size : int, device : str) -> None:
+    def __init__(self, f_add_elems : int, f_conn_elems : int, f_term_elems : int,
+                 mlp1_depth : int, mlp1_dropout_p : float, mlp1_hidden_dim : int,
+                 mlp2_depth : int, mlp2_dropout_p : float, mlp2_hidden_dim : int,
+                 graph_emb_size : int, max_n_nodes : int, node_emb_size : int,
+                 device : str) -> None:
         super().__init__()
 
         self.device = device
@@ -235,24 +240,25 @@ class GlobalReadout(torch.nn.Module):
         Defines forward pass.
         """
         if self.device == "cuda":
-            self.fAddNet1 = self.fAddNet1.to("cuda", non_blocking=True)
+            self.fAddNet1  = self.fAddNet1.to("cuda", non_blocking=True)
             self.fConnNet1 = self.fConnNet1.to("cuda", non_blocking=True)
-            self.fAddNet2 = self.fAddNet2.to("cuda", non_blocking=True)
+            self.fAddNet2  = self.fAddNet2.to("cuda", non_blocking=True)
             self.fConnNet2 = self.fConnNet2.to("cuda", non_blocking=True)
             self.fTermNet2 = self.fTermNet2.to("cuda", non_blocking=True)
 
         # get preliminary f_add and f_conn
-        f_add_1 = self.fAddNet1(node_level_output)
+        f_add_1  = self.fAddNet1(node_level_output)
         f_conn_1 = self.fConnNet1(node_level_output)
 
         if self.device == "cuda":
-            f_add_1 = f_add_1.to("cuda", non_blocking=True)
+            f_add_1  = f_add_1.to("cuda", non_blocking=True)
             f_conn_1 = f_conn_1.to("cuda", non_blocking=True)
 
-        # reshape preliminary APDs into flattenened vectors (e.g. one vector per graph in batch)
-        f_add_1_size = f_add_1.size()
+        # reshape preliminary APDs into flattenened vectors (e.g. one vector per
+        # graph in batch)
+        f_add_1_size  = f_add_1.size()
         f_conn_1_size = f_conn_1.size()
-        f_add_1 = f_add_1.view((f_add_1_size[0], f_add_1_size[1] * f_add_1_size[2]))
+        f_add_1  = f_add_1.view((f_add_1_size[0], f_add_1_size[1] * f_add_1_size[2]))
         f_conn_1 = f_conn_1.view((f_conn_1_size[0], f_conn_1_size[1] * f_conn_1_size[2]))
 
         # get final f_add, f_conn, and f_term
@@ -265,7 +271,7 @@ class GlobalReadout(torch.nn.Module):
         f_term_2 = self.fTermNet2(graph_embedding_batch)
 
         if self.device == "cuda":
-            f_add_2 = f_add_2.to("cuda", non_blocking=True)
+            f_add_2  = f_add_2.to("cuda", non_blocking=True)
             f_conn_2 = f_conn_2.to("cuda", non_blocking=True)
             f_term_2 = f_term_2.to("cuda", non_blocking=True)
 
