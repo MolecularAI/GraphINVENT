@@ -247,12 +247,13 @@ def collect_global_constants(parameters : dict, job_dir : str) -> namedtuple:
         print("-- Job parameters match preprocessing parameters.", flush=True)
 
     # load QSAR models (sklearn activity model)
-    print("-- Loading pre-trained scikit-learn activity model.", flush=True)
-    for qsar_model_name, qsar_model_path in constants_dict["qsar_models"].items():
-        with open(qsar_model_path, 'rb') as file:
-            model_dict                                     = pickle.load(file)
-            activity_model                                 = model_dict["classifier_sv"]
-            constants_dict["qsar_models"][qsar_model_name] = activity_model
+    if constants_dict["job_type"] == "fine-tune":
+        print("-- Loading pre-trained scikit-learn activity model.", flush=True)
+        for qsar_model_name, qsar_model_path in constants_dict["qsar_models"].items():
+            with open(qsar_model_path, 'rb') as file:
+                model_dict                                     = pickle.load(file)
+                activity_model                                 = model_dict["classifier_sv"]
+                constants_dict["qsar_models"][qsar_model_name] = activity_model
 
     # convert `CONSTANTS` dictionary into a namedtuple (immutable + cleaner)
     Constants = namedtuple("CONSTANTS", sorted(constants_dict))
