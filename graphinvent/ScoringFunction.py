@@ -117,7 +117,7 @@ class ScoringFunction:
                 assert 0 < target_size, "Target size must be greater than 0."
 
                 target_size *= torch.ones(self.n_graphs, device=self.device)
-                n_nodes      = torch.Tensor([graph.n_nodes for graph in graphs],
+                n_nodes      = torch.tensor([graph.n_nodes for graph in graphs],
                                             device=self.device)
                 max_nodes    = self.max_n_nodes
                 score        = (
