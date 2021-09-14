@@ -769,9 +769,9 @@ class Analyzer:
             # in computing the number of structures, important to use
             # `target_output` and not `renormalized_target_output` (unnormalized
             # means the sum is number of subgraphs)
-            n_structures += torch.sum(target_output[:, -1])
+            n_structures += torch.sum(target_output[:, -1]).unsqueeze(dim=0)
 
-        avg_final_likelihood = torch.sum(likelihoods, dim=0)[0] / n_structures
+        avg_final_likelihood = torch.sum(likelihoods, dim=0) / n_structures[0]
 
         return likelihoods, avg_final_likelihood
 
