@@ -265,8 +265,8 @@ class DataProcesser:
                                group_size=constants.batch_size)
 
         # keep track of the last molecule to be processed in `self.resume_idx`
-        self.resume_idx   += molecules_processed   # number of molecules processed
-        self.dataset_size += constants.batch_size  # subgraphs processed
+        self.resume_idx   += molecules_processed  # number of molecules processed
+        self.dataset_size += molecules_processed  # subgraphs processed
 
         return None
 
