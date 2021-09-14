@@ -61,7 +61,7 @@ def main():
         # evaluate best model using the test set data
         workflow.testing_phase()
 
-    if job_type == "fine-tune":
+    elif job_type == "fine-tune":
         # write training parameters
         util.write_job_parameters(params=constants)
 
