@@ -154,11 +154,12 @@ class Workflow:
             start_epoch (int) : Epoch at which to start training.
             end_epoch (int)   : Epoch at which to end training.
         """
-        print("* Defining model.", flush=True)
+
         job_dir = self.constants.job_dir
 
         if self.constants.job_type == "fine-tune":
-
+            
+            print("* Defining models.", flush=True)
             self.agent_model = self.create_model()
             self.prior_model = self.create_model()
             self.basf_model  = self.create_model()
@@ -237,7 +238,10 @@ class Workflow:
             )
         else:
             self.restart_epoch = 0
-
+            
+            print("* Defining model.", flush=True)
+            self.model = self.create_model()
+            
             print("-- Defining optimizer.", flush=True)
             self.optimizer = torch.optim.Adam(params=self.model.parameters(),
                                               lr=self.constants.init_lr)
