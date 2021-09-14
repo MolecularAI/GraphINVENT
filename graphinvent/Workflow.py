@@ -158,7 +158,7 @@ class Workflow:
         job_dir = self.constants.job_dir
 
         if self.constants.job_type == "fine-tune":
-            
+
             print("* Defining models.", flush=True)
             self.agent_model = self.create_model()
             self.prior_model = self.create_model()
@@ -209,6 +209,7 @@ class Workflow:
 
         elif self.constants.restart:
 
+            print("* Defining model.", flush=True)
             self.model = self.create_model()
 
             print("-- Loading model from previous saved state.", flush=True)
@@ -238,7 +239,7 @@ class Workflow:
             )
         else:
             self.restart_epoch = 0
-            
+
             print("* Defining model.", flush=True)
             self.model = self.create_model()
             
