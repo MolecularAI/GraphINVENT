@@ -168,26 +168,20 @@ class Workflow:
                   flush=True)
 
             self.restart_epoch = util.get_restart_epoch()
-            model_dir          = self.constants.dataset_dir
+            model_dir          = self.constants.pretrained_model_dir
 
             try:
                 self.agent_model = util.load_saved_model(
                     model=self.agent_model,
-                    path=f"{job_dir}model_restart_{self.restart_epoch}.pth"
+                    path=f"{model_dir}model_restart_{self.restart_epoch}.pth"
                 )
             except FileNotFoundError:
                 self.agent_model = util.load_saved_model(
                     model=self.agent_model,
-                    path=f"{model_dir}pretrained_model.pth"
+                    path=f"{self.constants.dataset_dir}pretrained_model.pth"
                 )
-            self.prior_model = util.load_saved_model(
-                model=self.prior_model,
-                path=f"{model_dir}pretrained_model.pth"
-            )
-            self.basf_model = util.load_saved_model(
-                model=self.basf_model,
-                path=f"{model_dir}pretrained_model.pth"
-            )
+            self.prior_model = deepcopy(self.agent_model)
+            self.basf_model  = deepcopy(self.agent_model)
 
             print("-- Defining optimizer.", flush=True)
             self.optimizer = torch.optim.Adam(params=self.agent_model.parameters(),
@@ -392,7 +386,7 @@ class Workflow:
 
         print(f"* Loading model from saved state (Epoch {self.restart_epoch}).",
               flush=True)
-        model_path = (f"{self.constants.job_dir} "
+        model_path = (f"{self.constants.job_dir}"
                       f"model_restart_{self.restart_epoch}.pth")
         self.model = self.create_model()
         self.model = util.load_saved_model(model=self.model, path=model_path)
@@ -414,7 +408,7 @@ class Workflow:
 
         print(f"* Loading model from previous saved state (Epoch "
               f"{self.restart_epoch}).", flush=True)
-        model_path = (f"{self.constants.job_dir} "
+        model_path = (f"{self.constants.job_dir}"
                       f"model_restart_{self.restart_epoch}.pth")
         self.model = self.create_model()
         self.model = util.load_saved_model(model=self.model, path=model_path)
@@ -470,7 +464,7 @@ class Workflow:
                 print(f"* Saving model state at Epoch {self.current_epoch}.",
                       flush=True)
                 # `pickle.HIGHEST_PROTOCOL` good for large objects
-                model_path = (f"{self.constants.job_dir} "
+                model_path = (f"{self.constants.job_dir}"
                               f"model_restart_{self.current_epoch}.pth")
                 torch.save(obj=model_to_evaluate.state_dict(),
                            f=model_path,
@@ -486,7 +480,7 @@ class Workflow:
                 print(f"* Saving model state at Epoch {self.current_epoch}.",
                       flush=True)
                 # `pickle.HIGHEST_PROTOCOL` good for large objects
-                model_path = (f"{self.constants.job_dir} "
+                model_path = (f"{self.constants.job_dir}"
                               f"model_restart_{self.current_epoch}.pth")
                 torch.save(obj=model_to_evaluate.state_dict(),
                            f=model_path,
