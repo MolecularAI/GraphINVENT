@@ -183,7 +183,9 @@ class Analyzer:
         fraction_valid, validity_tensor, _ = util.write_molecules(
             molecules=generated_graphs,
             final_likelihoods=loglikelihoods,
-            epoch=epoch_id
+            epoch=epoch_id,
+            write=True,
+            label="training",
         )
         prop_dict[(epoch_key, "fraction_valid")]  = fraction_valid
         prop_dict[(epoch_key, "validity_tensor")] = validity_tensor
