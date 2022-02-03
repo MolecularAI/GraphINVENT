@@ -7,7 +7,7 @@ To begin using GraphINVENT, we have prepared the following tutorial to guide a n
 
 ### Training using the example dataset
 #### Preparing a training job
-The example dataset is located in [/data/pre-training/gdb13_1K/](../GraphINVENT/data/pre-training/gdb13_1K/) and contains the following:
+The example dataset is located in [/data/pre-training/gdb13_1K/](/data/pre-training/gdb13_1K/) and contains the following:
 * 1K molecules in each the training, validation, and test set
 * atom types : {C, N, O, S, Cl}
 * formal charges : {-1, 0, +1}
