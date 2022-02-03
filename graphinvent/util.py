@@ -7,7 +7,9 @@ from collections import namedtuple
 from typing import Union, Tuple
 from warnings import filterwarnings
 import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib import pyplot
 import torch
 import rdkit
 from rdkit import RDLogger
