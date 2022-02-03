@@ -179,7 +179,7 @@ class Analyzer:
         prop_dict[(epoch_key, "run_time")]         = round(time.time() - self.start_time, 2)
 
         # calculate validity list now, so as not to write to CSV in previous step
-        epoch_id = epoch_label + "_" + str(generation_batch_idx)
+        epoch_id = epoch_label + " " + str(generation_batch_idx)
         fraction_valid, validity_tensor, _ = util.write_molecules(
             molecules=generated_graphs,
             final_likelihoods=loglikelihoods,
