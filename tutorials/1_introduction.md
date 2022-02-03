@@ -15,7 +15,7 @@ The example dataset is located in [../data/pre-training/gdb13_1K/](../data/pre-t
 
 The last three points of information must be included in the submission script, as well as any additional parameters and hyperparameters to use for the training job.
 
-A sample submission script [submit.py](../submit.py) has been provided. Begin by modifying the submission script to specify where the dataset can be found and what type of job you want to run. For training on the example set, the settings below are recommended:
+A sample submission script [submit-pre-training.py](../submit-pre-training.py) has been provided. Begin by modifying the submission script to specify where the dataset can be found and what type of job you want to run. For training on the example set, the settings below are recommended:
 
 ```
 submit.py >
