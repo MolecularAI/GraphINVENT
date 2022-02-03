@@ -7,6 +7,8 @@ from collections import namedtuple
 from typing import Union, Tuple
 from warnings import filterwarnings
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import torch
 import rdkit
@@ -676,10 +678,10 @@ def write_molecules(molecules : list,
     """
     # save molecules as SMILE
     if constants.job_type == "fine-tune":
-        step         = epoch.split(" ")[1]
+        step         = epoch.split("_")[1]
         smi_filename = constants.job_dir + f"generation/step{step}_{label}.smi"
     else:
-        epoch_number = epoch.split(" ")[1]
+        epoch_number = epoch.split("_")[1]
         smi_filename = constants.job_dir + f"generation/epoch_{epoch_number}.smi"
 
     (fraction_valid,
