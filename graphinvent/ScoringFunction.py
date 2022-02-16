@@ -9,7 +9,7 @@ from rdkit import DataStructs
 from rdkit.Chem import QED, AllChem
 import numpy as np
 import sklearn
-
+from sklearn import svm
 
 class ScoringFunction:
     """
