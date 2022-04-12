@@ -1,13 +1,14 @@
 """
 Uses the Therapeutics Data Commons (TDC) to get datasets for goal-directed
-molecular optimization tasks.
+molecular optimization tasks and then filters the molecules based on number
+of heavy atoms and formal charge.
 
 See:
 * https://tdcommons.ai/
 * https://github.com/mims-harvard/TDC
 
 To use script, run:
-python tdc-create-dataset.py TODO
+(graphinvent)$ python tdc-create-dataset.py --dataset MOSES
 """
 import os
 import argparse
