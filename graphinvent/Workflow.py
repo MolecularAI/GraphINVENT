@@ -51,6 +51,10 @@ class Workflow:
         self.train_h5_path = self.constants.training_set[:-3] + "h5"
         self.valid_h5_path = self.constants.validation_set[:-3] + "h5"
 
+        self.test_smi_path  = self.constants.test_set
+        self.train_smi_path = self.constants.training_set
+        self.valid_smi_path = self.constants.validation_set
+
         # general paramters (placeholders)
         self.optimizer     = None
         self.scheduler     = None
@@ -303,9 +307,12 @@ class Workflow:
                     "creating new ones, please delete them and rerun the "
                     "program. Otherwise, check your input file."
                 )
-            self.preprocess_valid_data()
-            self.preprocess_test_data()
-            self.preprocess_train_data()
+            if os.path.exists(self.valid_smi_path):       
+                self.preprocess_valid_data()
+            if os.path.exists(self.test_smi_path):       
+                self.preprocess_test_data()
+            if os.path.exists(self.train_smi_path):       
+                self.preprocess_train_data()
 
         else:  # restart existing preprocessing job
 
@@ -317,22 +324,28 @@ class Workflow:
                     "over 'test.h5' and 'valid.h5' as they seem to be finished).",
                     flush=True,
                 )
-                self.preprocess_train_data()
+                if os.path.exists(self.train_smi_path):       
+                    self.preprocess_train_data()
             elif (os.path.exists(self.test_h5_path + ".chunked") or
                   os.path.exists(self.valid_h5_path)):
                 print(
                     "-- Restarting preprocessing job from 'test.h5' (skipping "
                     "over 'valid.h5' as it appears to be finished).",
                     flush=True,
-                )
-                self.preprocess_test_data()
-                self.preprocess_train_data()
+                ) 
+                if os.path.exists(self.test_smi_path):       
+                    self.preprocess_test_data()
+                if os.path.exists(self.train_smi_path):       
+                    self.preprocess_train_data()
             elif os.path.exists(self.valid_h5_path + ".chunked"):
                 print("-- Restarting preprocessing job from 'valid.h5'",
                       flush=True)
-                self.preprocess_valid_data()
-                self.preprocess_test_data()
-                self.preprocess_train_data()
+                if os.path.exists(self.valid_smi_path):       
+                    self.preprocess_valid_data()
+                if os.path.exists(self.test_smi_path):       
+                    self.preprocess_test_data()
+                if os.path.exists(self.train_smi_path):       
+                    self.preprocess_train_data()
             else:
                 raise ValueError(
                     "Warning: Nothing to restart! Check input file and/or "
