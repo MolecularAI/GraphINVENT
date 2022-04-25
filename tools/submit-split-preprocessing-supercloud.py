@@ -45,7 +45,7 @@ parser.add_argument("--type",
 args = parser.parse_args()
 
 # define what you want to do for the specified job(s)
-DATASET          = "gdb13_1K-debug"  # dataset name in "./data/pre-training/"
+DATASET          = "MOSES"  # dataset name in "./data/pre-training/"
 JOB_TYPE         = "preprocess"      # "preprocess", "train", "generate", or "test"
 JOBDIR_START_IDX = 0                 # where to start indexing job dirs
 N_JOBS           = 1                 # number of jobs to run per model
@@ -67,15 +67,15 @@ else:
 
 # set paths here
 HOME             = str(Path.home())
-PYTHON_PATH      = f"{HOME}/path/to/graphinvent/bin/python"
+PYTHON_PATH      = f"{HOME}/.conda/envs/graphinvent/bin/python"
 GRAPHINVENT_PATH = "./graphinvent/"
 DATA_PATH        = "./data/pre-training/"
 
 # define dataset-specific parameters
 params = {
-    "atom_types"   : ["C", "N", "O", "S", "Cl"],
+    "atom_types"   : ["C", "N", "O", "F", "S", "Cl", "Br"],
     "formal_charge": [-1, 0, +1],
-    "max_n_nodes"  : 13,
+    "max_n_nodes"  : 27,
     "job_type"     : JOB_TYPE,
     "restart"      : RESTART,
     "model"        : "GGNN",
@@ -269,7 +269,7 @@ def get_n_splits(filename : str, n_lines_per_split : int=100000) -> None:
     """
     output_base = filename[:-4]
     input       = open(filename, "r")
-    n_splits    = ceil(len(input) / n_lines_per_split)
+    n_splits    = ceil(len(input.readlines()) / n_lines_per_split)
     return n_splits
 
 def load_ts_properties_from_csv(csv_path : str) -> Union[dict, None]:
@@ -464,36 +464,28 @@ if __name__ == "__main__":
         # file is split into files of max 100000 lines
         n_training_splits = get_n_splits(filename=f"{DATA_PATH}{DATASET}/train.smi",
                                          n_lines_per_split=100000)
-        n_test_splits     = get_n_splits(filename=f"{DATA_PATH}{DATASET}/test.smi",
-                                         n_lines_per_split=100000)
-        n_valid_splits    = get_n_splits(filename=f"{DATA_PATH}{DATASET}/valid.smi",
-                                         n_lines_per_split=100000)
 
-        # 1) train set
         for split_idx in range(n_training_splits):
             if not os.path.exists(f"{DATA_PATH}{dataset}_{split_idx}/"):
                 os.mkdir(f"{DATA_PATH}{dataset}_{split_idx}/")  # make the dir
-            os.rename(f"{DATA_PATH}{dataset}/train.{split_idx}.smi", f"{DATA_PATH}{dataset}_{split_idx}/train.smi")  # move the file to the dir and rename
-
-            DATASET               = f"{dataset}_{split_idx}/"
-            params["dataset_dir"] = f"{DATA_PATH}{DATASET}"
-            submit()
-
-        # 2) test set
-        for split_idx in range(n_test_splits):
-            if not os.path.exists(f"{DATA_PATH}{dataset}_{split_idx}/"):
-                os.mkdir(f"{DATA_PATH}{dataset}_{split_idx}/")  # make the dir
-            os.rename(f"{DATA_PATH}{dataset}/test.{split_idx}.smi", f"{DATA_PATH}{dataset}_{split_idx}/test.smi")  # move the file to the dir and rename
-
-            DATASET               = f"{dataset}_{split_idx}/"
-            params["dataset_dir"] = f"{DATA_PATH}{DATASET}"
-            submit()
-
-        # 3) valid set
-        for split_idx in range(n_valid_splits):
-            if not os.path.exists(f"{DATA_PATH}{dataset}_{split_idx}/"):
-                os.mkdir(f"{DATA_PATH}{dataset}_{split_idx}/")  # make the dir
-            os.rename(f"{DATA_PATH}{dataset}/valid.{split_idx}.smi", f"{DATA_PATH}{dataset}_{split_idx}/valid.smi")  # move the file to the dir and rename
+            
+            # moving train split into folder for given index
+            try:
+                os.rename(f"{DATA_PATH}{dataset}/train.{split_idx}.smi", f"{DATA_PATH}{dataset}_{split_idx}/train.smi")  # move the file to the dir and rename
+            except:
+                pass
+        
+            # moving test split into folder for given index, if test split exists
+            try:
+                os.rename(f"{DATA_PATH}{dataset}/test.{split_idx}.smi", f"{DATA_PATH}{dataset}_{split_idx}/test.smi")  # move the file to the dir and rename
+            except:
+                pass
+           
+            # moving valid split into folder for given index, if valid split exists
+            try:    
+                os.rename(f"{DATA_PATH}{dataset}/valid.{split_idx}.smi", f"{DATA_PATH}{dataset}_{split_idx}/valid.smi")  # move the file to the dir and rename
+            except:
+                pass
 
             DATASET               = f"{dataset}_{split_idx}/"
             params["dataset_dir"] = f"{DATA_PATH}{DATASET}"
