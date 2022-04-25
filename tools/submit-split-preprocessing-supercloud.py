@@ -469,8 +469,11 @@ if __name__ == "__main__":
             if not os.path.exists(f"{DATA_PATH}{dataset}_{split_idx}/"):
                 os.mkdir(f"{DATA_PATH}{dataset}_{split_idx}/")  # make the dir
             
-            # moving test split into folder for given index
-            os.rename(f"{DATA_PATH}{dataset}/train.{split_idx}.smi", f"{DATA_PATH}{dataset}_{split_idx}/train.smi")  # move the file to the dir and rename
+            # moving train split into folder for given index
+            try:
+                os.rename(f"{DATA_PATH}{dataset}/train.{split_idx}.smi", f"{DATA_PATH}{dataset}_{split_idx}/train.smi")  # move the file to the dir and rename
+            except:
+                pass
         
             # moving test split into folder for given index, if test split exists
             try:
