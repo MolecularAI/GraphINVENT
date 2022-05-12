@@ -9,7 +9,7 @@ from warnings import filterwarnings
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
-from matplotlib import pyplot
+from matplotlib import pyplot as plt
 import torch
 import rdkit
 from rdkit import RDLogger
