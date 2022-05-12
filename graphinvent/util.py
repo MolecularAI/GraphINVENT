@@ -19,9 +19,6 @@ from torch.utils.tensorboard import SummaryWriter
 # load GraphINVENT-specific functions
 from parameters.constants import constants
 
-# defines the tensorboard writer
-tb_writer = SummaryWriter(log_dir=constants.tensorboard_dir, flush_secs=10)
-
 
 def get_feature_vector_indices() -> list:
     """
@@ -280,7 +277,8 @@ def one_of_k_encoding(x : Union[str, int], allowable_set : list) -> 'generator':
 
 
 def properties_to_csv(prop_dict : dict, csv_filename : str,
-                      epoch_key : str, append : bool=True) -> None:
+                      epoch_key : str, tb_writer : SummaryWriter, 
+                      append : bool=True) -> None:
     """
     Writes a CSV summarizing how training is going by comparing the properties
     of the generated structures during evaluation to the training set. Also
@@ -584,7 +582,8 @@ def write_graphs_to_smi(smi_filename : str,
 
     return fraction_valid, validity_tensor, uniqueness_tensor
 
-def write_training_status(epoch : Union[int, None]=None,
+def write_training_status(tb_writer : SummaryWriter,
+                          epoch : Union[int, None]=None,
                           lr : Union[float, None]=None,
                           training_loss : Union[float, None]=None,
                           validation_loss : Union[float, None]=None,
@@ -742,7 +741,8 @@ def write_ts_properties(training_set_properties : dict) -> None:
                 csv_writer.writerow([key, value])
 
 def write_validation_scores(output_dir : str, epoch_key : str,
-                            model_scores : dict, append : bool=True) -> None:
+                            model_scores : dict, tb_writer : SummaryWriter,
+                            append : bool=True) -> None:
     """
     Writes a CSV with the model validation scores as a function of the epoch.
 
@@ -802,7 +802,8 @@ def write_validity(validity_file_path : str,
         for valid in validity_tensor:
             valid_file.write(f"{valid}\n")
 
-def tbwrite_loglikelihoods(step : Union[int, None]=None,
+def tbwrite_loglikelihoods(tb_writer : SummaryWriter,
+                           step : Union[int, None]=None,
                            agent_loglikelihoods : Union[torch.Tensor, None]=None,
                            prior_loglikelihoods : Union[torch.Tensor, None]=None) -> \
                            None:

@@ -134,9 +134,11 @@ class Analyzer:
             output_dir=constants.job_dir,
             epoch_key=epoch_key,
             model_scores=model_scores,
+            tb_writer=self.tb_writer,
             append=bool(epoch_key != f"{epoch_label} {constants.sample_every}")
         )
-        util.write_training_status(score=model_scores["UC-JSD"])
+        util.write_training_status(tb_writer=self.tb_writer,
+                                   score=model_scores["UC-JSD"])
 
     def evaluate_generated_graphs(self, generated_graphs : list,
                                   termination : torch.Tensor,
@@ -196,6 +198,7 @@ class Analyzer:
             util.properties_to_csv(prop_dict=prop_dict,
                                    csv_filename=f"{output}generation.log",
                                    epoch_key=epoch_key,
+                                   tb_writer=self.tb_writer,
                                    append=True)
 
             # join ts properties with prop_dict for plotting
@@ -276,6 +279,7 @@ class Analyzer:
         util.properties_to_csv(prop_dict=prop_dict,
                                csv_filename=f"{output}generation.log",
                                epoch_key=epoch_key,
+                               tb_writer=self.tb_writer,
                                append=True)
 
         # join ts properties with prop_dict for plotting

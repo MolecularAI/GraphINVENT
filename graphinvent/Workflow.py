@@ -377,7 +377,8 @@ class Workflow:
             avg_train_loss = self.train_epoch()
             avg_valid_loss = self.validation_epoch()
 
-            util.write_training_status(epoch=self.current_epoch,
+            util.write_training_status(tb_writer=self.analyzer.tb_writer,
+                                       epoch=self.current_epoch,
                                        lr=self.optimizer.param_groups[0]["lr"],
                                        training_loss=avg_train_loss,
                                        validation_loss=avg_valid_loss)
@@ -507,7 +508,8 @@ class Workflow:
 
         else:
             # score not computer, so use placeholder
-            util.write_training_status(score="NA")
+            util.write_training_status(tb_writer=self.analyzer.tb_writer,
+                                       score="NA")
             score = None
 
         return score
@@ -602,6 +604,7 @@ class Workflow:
         self.scheduler.step()
 
         util.write_training_status(
+            tb_writer=self.analyzer.tb_writer,
             epoch=self.current_epoch,
             lr=self.optimizer.param_groups[0]["lr"],
             training_loss=torch.clone(loss),
@@ -624,10 +627,14 @@ class Workflow:
             util.properties_to_csv(prop_dict=self.ts_properties,
                                    csv_filename=csv_path_and_filename,
                                    epoch_key="Training set",
+                                   tb_writer=self.analyzer.tb_writer,
                                    append=False)
 
             # begin writing `convergence.log` file
-            util.write_training_status(append=False)
+            util.write_training_status(
+                tb_writer=self.analyzer.tb_writer,
+                append=False
+            )
 
             # create `generation/` subdirectory to write generation output to
             os.makedirs(self.constants.job_dir + "generation/", exist_ok=True)
