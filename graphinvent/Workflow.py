@@ -10,7 +10,6 @@ import time
 import os
 from typing import Union, Tuple
 import torch
-import torch.utils.tensorboard
 from tqdm import tqdm
 
 # load GraphINVENT-specific functions
@@ -365,8 +364,9 @@ class Workflow:
         self.load_training_set_properties()
         self.create_output_files()
         self.analyzer = Analyzer(valid_dataloader=self.valid_dataloader,
-                                          train_dataloader=self.train_dataloader,
-                                          start_time=self.start_time)
+                                 train_dataloader=self.train_dataloader,
+                                 start_time=self.start_time,
+                                 create_tensorboard=True)
 
         start_epoch, end_epoch = self.define_model_and_optimizer()
 
@@ -396,7 +396,8 @@ class Workflow:
         self.restart_epoch = self.constants.generation_epoch
         self.analyzer = Analyzer(valid_dataloader=None,
                                  train_dataloader=None,
-                                 start_time=self.start_time)
+                                 start_time=self.start_time,
+                                 create_tensorboard=True)
 
         print(f"* Loading model from saved state (Epoch {self.restart_epoch}).",
               flush=True)
@@ -526,7 +527,8 @@ class Workflow:
         self.analyzer = Analyzer(
             valid_dataloader=None,
             train_dataloader=None,
-            start_time=self.start_time
+            start_time=self.start_time,
+            create_tensorboard=True
         )
 
         # define the scoring function to be used

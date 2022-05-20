@@ -277,7 +277,7 @@ def one_of_k_encoding(x : Union[str, int], allowable_set : list) -> 'generator':
 
 
 def properties_to_csv(prop_dict : dict, csv_filename : str,
-                      epoch_key : str, tb_writer : SummaryWriter, 
+                      epoch_key : str, tb_writer : Union[SummaryWriter, None], 
                       append : bool=True) -> None:
     """
     Writes a CSV summarizing how training is going by comparing the properties
@@ -289,6 +289,8 @@ def properties_to_csv(prop_dict : dict, csv_filename : str,
         prop_dict (dict)   : Contains molecular properties.
         csv_filename (str) : Full path/filename to CSV file.
         epoch_key (str)    : For example, "Training set" or "Epoch {n}".
+        tb_writer (Union[SummaryWriter, None]) : Tensorboard SummaryWriter (if one
+                             has been created).
         append (bool)      : Indicates whether to append to the output file (if
                              the file exists) or start a new one. Default `True`.
     """
@@ -350,11 +352,12 @@ def properties_to_csv(prop_dict : dict, csv_filename : str,
         pass
     else:
         # scalars
-        tb_writer.add_scalar("Evaluation/fraction_valid", frac_valid, epoch)
-        tb_writer.add_scalar("Evaluation/fraction_valid_and_properly_term", frac_valid_pt, epoch)
-        tb_writer.add_scalar("Evaluation/fraction_properly_terminated", frac_pt, epoch)
-        tb_writer.add_scalar("Evaluation/avg_n_nodes", avg_n_nodes, epoch)
-        tb_writer.add_scalar("Evaluation/fraction_unique", frac_unique, epoch)
+        if tb_writer is not None:
+            tb_writer.add_scalar("Evaluation/fraction_valid", frac_valid, epoch)
+            tb_writer.add_scalar("Evaluation/fraction_valid_and_properly_term", frac_valid_pt, epoch)
+            tb_writer.add_scalar("Evaluation/fraction_properly_terminated", frac_pt, epoch)
+            tb_writer.add_scalar("Evaluation/avg_n_nodes", avg_n_nodes, epoch)
+            tb_writer.add_scalar("Evaluation/fraction_unique", frac_unique, epoch)
 
 
 def read_column(path : str, column : int) -> np.ndarray:
@@ -582,7 +585,7 @@ def write_graphs_to_smi(smi_filename : str,
 
     return fraction_valid, validity_tensor, uniqueness_tensor
 
-def write_training_status(tb_writer : SummaryWriter,
+def write_training_status(tb_writer : Union[SummaryWriter, None],
                           epoch : Union[int, None]=None,
                           lr : Union[float, None]=None,
                           training_loss : Union[float, None]=None,
@@ -594,13 +597,15 @@ def write_training_status(tb_writer : SummaryWriter,
 
     Args:
     ----
-        epoch (Union[int, None])             : Current epoch.
-        lr (Union[float, None])              : Learning rate.
-        training_loss (Union[float, None])   : Training loss.
-        validation_loss (Union[float, None]) : Validation loss.
-        score (Union[float, None])           : Model score (the UC-JSD).
-        append (bool)                        : If True, appends to existing file.
-                                               If False, creates a new file.
+        tb_writer (Union[SummaryWriter, None]) : Tensorboard SummaryWriter (if one
+                                                 has been created).
+        epoch (Union[int, None])               : Current epoch.
+        lr (Union[float, None])                : Learning rate.
+        training_loss (Union[float, None])     : Training loss.
+        validation_loss (Union[float, None])   : Validation loss.
+        score (Union[float, None])             : Model score (the UC-JSD).
+        append (bool)                          : If True, appends to existing file.
+                                                 If False, creates a new file.
     """
     convergence_path = constants.job_dir + "convergence.log"
     if constants.job_type == "fine-tune":
@@ -622,9 +627,10 @@ def write_training_status(tb_writer : SummaryWriter,
                                       f"{training_loss:.8f}, "
                                       f"{validation_loss:.8f}, ")
                 # write to tensorboard
-                tb_writer.add_scalar("Training/training_loss", training_loss, epoch)
-                tb_writer.add_scalar("Training/validation_loss", validation_loss, epoch)
-                tb_writer.add_scalar("Training/lr", lr, epoch)
+                if tb_writer is not None:
+                    tb_writer.add_scalar("Training/training_loss", training_loss, epoch)
+                    tb_writer.add_scalar("Training/validation_loss", validation_loss, epoch)
+                    tb_writer.add_scalar("Training/lr", lr, epoch)
 
             elif score == "NA":
                 with open(convergence_path, "a") as output_file:
@@ -741,7 +747,7 @@ def write_ts_properties(training_set_properties : dict) -> None:
                 csv_writer.writerow([key, value])
 
 def write_validation_scores(output_dir : str, epoch_key : str,
-                            model_scores : dict, tb_writer : SummaryWriter,
+                            model_scores : dict, tb_writer : Union[SummaryWriter, None],
                             append : bool=True) -> None:
     """
     Writes a CSV with the model validation scores as a function of the epoch.
@@ -753,6 +759,8 @@ def write_validation_scores(output_dir : str, epoch_key : str,
         model_scores (dict) : Contains the average NLL per molecule of
                               {validation/train/generated} structures, and the
                               average model score (weighted mean of above two scores).
+        tb_writer (Union[SummaryWriter, None]) : Tensorboard SummaryWriter 
+                              object (if it was created).
         append (bool)       : Indicates whether to append to the output file or
                               start a new one.
     """
@@ -778,10 +786,11 @@ def write_validation_scores(output_dir : str, epoch_key : str,
     try:  # write to tensorboard
         epoch = int(epoch_key.split()[1])
         # scalars
-        tb_writer.add_scalar("Evaluation/avg_validation_likelihood", avg_likelihood_val, epoch)
-        tb_writer.add_scalar("Evaluation/avg_training_likelihood", avg_likelihood_train, epoch)
-        tb_writer.add_scalar("Evaluation/avg_generation_likelihood", avg_likelihood_gen, epoch)
-        tb_writer.add_scalar("Evaluation/uc_jsd", uc_jsd, epoch)
+        if tb_writer is not None:
+            tb_writer.add_scalar("Evaluation/avg_validation_likelihood", avg_likelihood_val, epoch)
+            tb_writer.add_scalar("Evaluation/avg_training_likelihood", avg_likelihood_train, epoch)
+            tb_writer.add_scalar("Evaluation/avg_generation_likelihood", avg_likelihood_gen, epoch)
+            tb_writer.add_scalar("Evaluation/uc_jsd", uc_jsd, epoch)
     except:
         pass
 
@@ -802,7 +811,7 @@ def write_validity(validity_file_path : str,
         for valid in validity_tensor:
             valid_file.write(f"{valid}\n")
 
-def tbwrite_loglikelihoods(tb_writer : SummaryWriter,
+def tbwrite_loglikelihoods(tb_writer : Union[SummaryWriter, None],
                            step : Union[int, None]=None,
                            agent_loglikelihoods : Union[torch.Tensor, None]=None,
                            prior_loglikelihoods : Union[torch.Tensor, None]=None) -> \
@@ -813,6 +822,8 @@ def tbwrite_loglikelihoods(tb_writer : SummaryWriter,
 
     Args:
     ----
+        tb_writer (Union[SummaryWriter, None])           : Tensorboard SummaryWriter 
+                                                           object (if it was created).
         step (Union[int, None])                          : Current fine-tuning step.
         agent_loglikelihoods (Union[torch.Tensor, None]) : Vector containing the
                                                            agent log-likelihoods
@@ -821,10 +832,11 @@ def tbwrite_loglikelihoods(tb_writer : SummaryWriter,
                                                            prior log-likelihoods
                                                            for sampled molecules.
     """
-    avg_agent_loglikelihood = torch.mean(agent_loglikelihoods)
-    avg_prior_loglikelihood = torch.mean(prior_loglikelihoods)
-    tb_writer.add_scalar("Train/agent_loglikelihood", avg_agent_loglikelihood, step)
-    tb_writer.add_scalar("Train/prior_loglikelihood", avg_prior_loglikelihood, step)
+    if tb_writer is not None:  # TODO this function may only be called when the tb_writer is not None, and thus this if statement may be redundant
+        avg_agent_loglikelihood = torch.mean(agent_loglikelihoods)
+        avg_prior_loglikelihood = torch.mean(prior_loglikelihoods)
+        tb_writer.add_scalar("Train/agent_loglikelihood", avg_agent_loglikelihood, step)
+        tb_writer.add_scalar("Train/prior_loglikelihood", avg_prior_loglikelihood, step)
 
 def load_saved_model(model : torch.nn.Module, path : str) -> torch.nn.Module:
     """

@@ -26,13 +26,19 @@ class Analyzer:
     def __init__(self,
                  valid_dataloader : Union[torch.utils.data.DataLoader, None]=None,
                  train_dataloader : Union[torch.utils.data.DataLoader, None]=None,
-                 start_time : Union[time.time, None]=None) -> None:
+                 start_time : Union[time.time, None]=None,
+                 create_tensorboard : bool=False) -> None:
 
         self.valid_dataloader = valid_dataloader
         self.train_dataloader = train_dataloader
         self.start_time       = start_time
-        self.tb_writer        = SummaryWriter(log_dir=constants.tensorboard_dir,
+        self.create_tensorboard    = create_tensorboard
+        if self.create_tensorboard:
+            self.tb_writer    = SummaryWriter(log_dir=constants.tensorboard_dir,
                                               flush_secs=10)
+        else:
+            self.tb_writer    = None
+
 
         self.model = None  # placeholder
 
@@ -897,4 +903,5 @@ class Analyzer:
             with open(constants.job_dir + "fine-tuning.log", "a") as output_file:
                 output_file.write(f"Step {step}, {score:.8f}\n")
 
-        self.tb_writer.add_scalar("Evaluation/score", score, step)
+        if self.create_tensorboard:
+            self.tb_writer.add_scalar("Evaluation/score", score, step)
