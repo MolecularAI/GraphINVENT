@@ -1,3 +1,5 @@
+**Please note: this repository is no longer being maintained.**
+
 # GraphINVENT
 
 ![cover image](./cover-image.png)
